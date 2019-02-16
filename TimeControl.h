@@ -9,6 +9,16 @@
 #define MIN_MINUTE 0
 #define MAX_MINUTE 59
 #define WORK_MINUTES 525 // Рабочее время 8ч 45м или 525м                        //////////////////////////////////////////////////////
+#define FILE_NAME "Data.wt"
+
+#define NAME_LENGTH 16
+#define YEAR_LENGTH 4
+#define MONTH_LENGTH 2
+#define WEEK_LENGTH 1
+#define WORK_TIME_LENGTH 4
+#define DINNER_TIME_LENGTH 3
+#define COUNT_DAYS 31
+#define DAY_LENGTH 9
 
 #include <string>
 #include <iostream>
@@ -62,6 +72,12 @@ namespace wt
 
         // вывод времени
         static void Calculate();
+
+        // проверить целостность файла, поля
+        static void Check();
+
+        // создать файл по шаблону
+        static void CreateTemplate();
     };
 };
 

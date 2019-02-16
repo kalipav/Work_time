@@ -10,10 +10,13 @@ int main ()
     // бесконечный цикл для switch
     for (;;)
     {
+        // проверить целостность файла, поля
+        wt::TimeControl::Check();
+
     	cout << endl;
 
         // вывод времени
-    	wt::TimeControl::Calculate();
+        wt::TimeControl::Calculate();
 
         // ввод команды
     	cout << "> ";

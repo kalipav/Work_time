@@ -546,3 +546,113 @@ void wt::TimeControl::Delete ()
 	}
 }
 */
+
+// проверить целостность файла, поля
+void wt::TimeControl::Check()
+{
+    // объект для проверки файла
+    std::fstream finout(FILE_NAME, std::ios::in | std::ios::out);
+
+    // проверка открылся ли файл
+    if (!finout)
+    {
+        std::cout << "Check(): File is not open!\n";
+
+        // создать файл по шаблону
+        CreateTemplate();
+    };
+
+    // проверка на целостность файла
+}
+
+// создать файл по шаблону
+void wt::TimeControl::CreateTemplate()
+{
+    // объект для создания файла
+    std::ofstream fout(FILE_NAME);
+
+    // проверка открылся ли файл
+    if (!fout)
+    {
+        std::cout << "CreateTemplate(): File is not open!\n";
+        return;
+    };
+
+    // создаем строку для шаблона
+    std::string template_str = "";
+
+    // добавляем индикатор начала файла
+    template_str += "beg";
+
+    // добавляем место под имя
+    template_str += "nam";
+    for (int i = 0; i < NAME_LENGTH; ++i)
+    {
+        template_str += " ";
+    };
+
+    // добавляем место под год
+    template_str += "yea";
+    for (int i = 0; i < YEAR_LENGTH; ++i)
+    {
+        template_str += " ";
+    };
+
+    // добавляем место под месяц
+    template_str += "mnt";
+    for (int i = 0; i < MONTH_LENGTH; ++i)
+    {
+        template_str += " ";
+    };
+
+    // добавляем место под день недели для первого числа месяца
+    template_str += "fst";
+    for (int i = 0; i < WEEK_LENGTH; ++i)
+    {
+        template_str += " ";
+    };
+
+    // добавляем место под количество рабочих часов
+    template_str += "wot";
+    for (int i = 0; i < WORK_TIME_LENGTH; ++i)
+    {
+        template_str += " ";
+    };
+
+    // добавляем место под обеденное время
+    template_str += "din";
+    for (int i = 0; i < DINNER_TIME_LENGTH; ++i)
+    {
+        template_str += " ";
+    };
+
+    // добавляем место под даты
+    for (int i = 1; i <= COUNT_DAYS; ++i)
+    {
+        template_str += "day";
+
+        // массив для чисел дней
+        char day[2];
+
+        // конвертация числа в символьное значение
+        ConvertIntToChar(i, day);
+
+        // копируем значение
+        template_str += day[0];
+        template_str += day[1];
+
+        // заносим пробелы под день недели, время начала и время конца рабочего дня
+        for (int i = 0; i < DAY_LENGTH; ++i)
+        {
+            template_str += " ";
+        };
+    };
+
+    // добавляем место под индикатор окончания файла
+    template_str += "end";
+
+    // записываем в файл шаблон
+    fout << template_str;
+
+    std::cout << "CreateTemplate(): File created.\n";
+}
