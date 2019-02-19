@@ -2,23 +2,28 @@
 #define _TIMECONTROL_H_
 
     // константы, контролирующие корректность ввода пользователя
-#define MIN_DAY 1
-#define MAX_DAY 31
-#define MIN_HOUR 0
-#define MAX_HOUR 23
+#define MIN_DAY    1
+#define MAX_DAY    31
+#define MIN_HOUR   0
+#define MAX_HOUR   23
 #define MIN_MINUTE 0
 #define MAX_MINUTE 59
-#define WORK_MINUTES 525 // Рабочее время 8ч 45м или 525м                        //////////////////////////////////////////////////////
-#define FILE_NAME "Data.wt"
+#define FILE_NAME  "Data.wt"
 
-#define NAME_LENGTH 16
-#define YEAR_LENGTH 4
-#define MONTH_LENGTH 2
-#define WEEK_LENGTH 1
-#define WORK_TIME_LENGTH 4
+    // длины полей для размещения информации в файле
+#define NAME_LENGTH        16
+#define YEAR_LENGTH        4
+#define MONTH_LENGTH       2
+#define WEEK_LENGTH        1
+#define WORK_TIME_LENGTH   4
 #define DINNER_TIME_LENGTH 3
-#define COUNT_DAYS 31
-#define DAY_LENGTH 9
+#define COUNT_DAYS         31
+#define DAY_LENGTH         9
+
+    // флаги файла
+#define BEGIN_FILE_WORD "beg"
+#define END_FILE_WORD   "end"
+#define FILE_LENGTH     485
 
 #include <string>
 #include <iostream>
@@ -52,7 +57,7 @@ namespace wt
         static void ConvertIntToChar (const int&, char*);
 
         // преобразование char в int
-        static int& ConvertCharToInt (const char*);
+        static int ConvertCharToInt (const char*);
 
     public:
         // конструктор
@@ -61,7 +66,7 @@ namespace wt
         // добавить рабочий день
         void Add(const wt::Add_status& flag = ADD);
 
-
+        // очистить время дня
         //static void Delete();
 
         // сбросить всё рабочее время
@@ -74,10 +79,13 @@ namespace wt
         static void Calculate();
 
         // проверить целостность файла, поля
-        static void Check();
+        static bool Check();
 
         // создать файл по шаблону
-        static void CreateTemplate();
+        static bool CreateTemplate();
+
+        // проверка на целостность файла
+        static bool IsCrushed(std::fstream&);
     };
 };
 

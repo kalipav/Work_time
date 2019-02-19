@@ -4,23 +4,32 @@
 
 int main ()
 {
+    std::cout << "\tWORK TIME CONTROL\n\n";
+
+    // проверить целостность файла, поля
+    if (!wt::TimeControl::Check())
+    {
+        std::cout << "Errors found. Exit...\n";
+        return 0;
+    };
+
     // переменная для записи команды
     char command;
 
     // бесконечный цикл для switch
     for (;;)
     {
-        // проверить целостность файла, поля
-        wt::TimeControl::Check();
-
-    	cout << endl;
-
-        // вывод времени
-        wt::TimeControl::Calculate();
-
         // ввод команды
-    	cout << "> ";
+        cout << "Enter 'h' for help.\n";
+        cout << "> ";
     	cin >> command;
+
+        // проверить целостность файла, поля
+        if (!wt::TimeControl::Check())
+        {
+            std::cout << "Errors found. Exit...\n";
+            break;
+        };
 
         switch (command)
         {
@@ -61,5 +70,7 @@ int main ()
         default:
         	cout << "Unknown command.\n";
         }
-    }
+    };
+
+    return 0;
 }

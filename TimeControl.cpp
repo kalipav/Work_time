@@ -16,7 +16,7 @@ wt::TimeControl::TimeControl()
 // преобразование char в int
 // [in] const char* - массив, состоящий из 2-х символов
 // [out] int - преобразованное значение
-int& wt::TimeControl::ConvertCharToInt (const char* p_MAS_CHAR)
+int wt::TimeControl::ConvertCharToInt (const char* p_MAS_CHAR)
 {
     int number = 0;
 
@@ -132,7 +132,7 @@ void wt::TimeControl::Calculate()
                                          bufferDate.m_buffer.startMinute);
 
                         // вычитаем 8ч 45м (525м)                                     ///////////////////////////////////////////////////
-                        bufferMinutes -= WORK_MINUTES;
+                        bufferMinutes -= 525;
 					};
 				}
 				else
@@ -548,7 +548,8 @@ void wt::TimeControl::Delete ()
 */
 
 // проверить целостность файла, поля
-void wt::TimeControl::Check()
+// [out] bool - true - успешное завершение метода, false - выход из программы
+bool wt::TimeControl::Check()
 {
     // объект для проверки файла
     std::fstream finout(FILE_NAME, std::ios::in | std::ios::out);
@@ -556,17 +557,112 @@ void wt::TimeControl::Check()
     // проверка открылся ли файл
     if (!finout)
     {
-        std::cout << "Check(): File is not open!\n";
+        std::cout << "File is not open!\n";
 
-        // создать файл по шаблону
-        CreateTemplate();
+        // буферная переменная
+        char buf;
+
+        // цикл опроса пользователя
+        while (buf != 'y' && buf != 'n')
+        {
+            // предложить пользователю создать новый файл
+            std::cout << "Do you want to create a new file? y/n: ";
+
+            // ввод
+            std::cin >> buf;
+        };
+
+        // обработка выбора пользователя
+        if (buf == 'y')
+        {
+            // создать файл по шаблону
+            if (!CreateTemplate())
+            {
+                std::cout << "Check ended with error!\n";
+                return false;
+            };
+
+            // повторное открытие файла
+            finout.open(FILE_NAME, std::ios::in | std::ios::out);
+
+            // проверка открылся ли файл во второй раз
+            if (!finout)
+            {
+                std::cout << "File is not open!\n";
+                return false;
+            };
+        }
+        else
+        {
+            std::cout << "Check ended with error!\n";
+            return false;
+        }
     };
 
     // проверка на целостность файла
+    if (!IsCrushed(finout))
+    {
+        std::cout << "Check ended with error!\n";
+        return false;
+    };
+
+    // закрываем файл
+    finout.close();
+
+    // успешное завершение метода
+    return true;
+}
+
+// проверка на целостность файла
+// [in/out] std::fstream& - объект для работы с файлом
+// [out] bool - true - проверка прошла успешно, false - файл поврежден
+bool wt::TimeControl::IsCrushed(std::fstream& r_finout)
+{
+    // устанавливаем курсор на начало файла
+    r_finout.seekg(0, std::ios::beg);
+
+    // строка для обработки файла
+    std::string buf;
+
+    // считывание первых трех символов файла
+    for (int i = 0; i < 3; ++i)
+    {
+        buf += r_finout.get();
+    };
+
+    // проверка считанных символов
+    if (buf != BEGIN_FILE_WORD)
+    {
+        std::cout << "File crushed!\n";
+        return false;
+    };
+
+    // обнуляем буфер
+    buf = "";
+
+    // переносим курсор на позицию для считывания последних трех символов
+    r_finout.seekg(FILE_LENGTH, std::ios::beg);
+
+    // считываем три последних символа файла
+    for (int i = 0; i < 3; ++i)
+    {
+        buf += r_finout.get();
+    };
+
+    // проверка считанных символов
+    if (buf != END_FILE_WORD)
+    {
+        std::cout << "File crushed!\n";
+        return false;
+    };
+
+    // файл цел
+    return true;
 }
 
 // создать файл по шаблону
-void wt::TimeControl::CreateTemplate()
+// [out] bool - удачное/неудачное завершение метода
+bool wt::TimeControl::CreateTemplate()
 {
     // объект для создания файла
     std::ofstream fout(FILE_NAME);
@@ -574,15 +670,15 @@ void wt::TimeControl::CreateTemplate()
     // проверка открылся ли файл
     if (!fout)
     {
-        std::cout << "CreateTemplate(): File is not open!\n";
-        return;
+        std::cout << "File is not open!\n";
+        return false;
     };
 
     // создаем строку для шаблона
     std::string template_str = "";
 
     // добавляем индикатор начала файла
-    template_str += "beg";
+    template_str += BEGIN_FILE_WORD;
 
     // добавляем место под имя
     template_str += "nam";
@@ -649,10 +745,16 @@ void wt::TimeControl::CreateTemplate()
     };
 
     // добавляем место под индикатор окончания файла
-    template_str += "end";
+    template_str += END_FILE_WORD;
 
     // записываем в файл шаблон
     fout << template_str;
 
-    std::cout << "CreateTemplate(): File created.\n";
+    // закрываем файл
+    fout.close();
+
+    // удачное завершение метода
+    std::cout << "File created.\n";
+
+    return true;
 }
