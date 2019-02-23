@@ -25,8 +25,18 @@
 #define END_FILE_WORD   "end"
 #define FILE_LENGTH     485
 
+    // позиции параметров в файле
+#define POS_NAME        6
+#define POS_YEAR        25
+#define POS_MONTH       32
+#define POS_WEEK        37
+#define POS_WORK_TIME   41
+#define POS_DINNER_TIME 48
+
 #include <string>
 #include <iostream>
+#include <windows.h>
+#include <conio.h>
 
 using std::cout;
 using std::cin;
@@ -78,7 +88,7 @@ namespace wt
         // вывод времени
         static void Calculate();
 
-        // проверить целостность файла, поля
+        // проверка файла
         static bool Check();
 
         // создать файл по шаблону
@@ -86,6 +96,12 @@ namespace wt
 
         // проверка на целостность файла
         static bool IsCrushed(std::fstream&);
+
+        // заполнение шаблона
+        static void FillTemplate();
+
+        // приветствие пользователя
+        static void WelcomeUser();
     };
 };
 

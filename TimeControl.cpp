@@ -562,15 +562,12 @@ bool wt::TimeControl::Check()
         // буферная переменная
         char buf;
 
-        // цикл опроса пользователя
-        while (buf != 'y' && buf != 'n')
-        {
-            // предложить пользователю создать новый файл
-            std::cout << "Do you want to create a new file? y/n: ";
+        // предложить пользователю создать новый файл
+        std::cout << "Do you want to create a new file? (y - \"yes\"): ";
 
-            // ввод
-            std::cin >> buf;
-        };
+        // ввод
+        buf = _getch();
+        std::cout << buf << '\n';
 
         // обработка выбора пользователя
         if (buf == 'y')
@@ -753,8 +750,165 @@ bool wt::TimeControl::CreateTemplate()
     // закрываем файл
     fout.close();
 
+    // заполнение шаблона
+    FillTemplate();
+
     // удачное завершение метода
     std::cout << "File created.\n";
 
     return true;
+}
+
+// заполнение шаблона
+void wt::TimeControl::FillTemplate()
+{
+    // объект для записи
+    std::fstream finout(FILE_NAME, std::ios::in | std::ios::out);
+
+    // строка-буфер
+    std::string buf;
+
+    // символ подтверждения имени
+    char symbol;
+
+    // запрашиваем имя у пользователя пока не будет введено подтверждение имени или пока имя длиннее поля под имя
+    do
+    {
+        std::cout << "Enter your name (" << NAME_LENGTH << " symbols max): ";
+        std::cin >> buf;
+
+        std::cout << "If correct - enter 'y': ";
+        symbol = _getch();
+        std::cout << symbol << '\n';
+    } while (symbol != 'y' || buf.size() > NAME_LENGTH);
+
+    // записываем имя в файл
+    // перемещаем курсор на позицию с именем для ввода имени
+    finout.seekp(POS_NAME, std::ios::beg);
+
+    // записываем имя
+    finout << buf;
+
+    // вводим год
+    do
+    {
+        std::cout << "Enter year: ";
+        std::cin >> buf;
+
+        std::cout << "If correct - enter 'y': ";
+        symbol = _getch();
+        std::cout << symbol << '\n';
+    } while (symbol != 'y' || buf.size() > YEAR_LENGTH);
+
+    // записываем год в файл
+    // перемещаем курсор на позицию с годом
+    finout.seekp(POS_YEAR, std::ios::beg);
+
+    // записываем год
+    finout << buf;
+
+    // вводим месяц
+    do
+    {
+        std::cout << "Enter month: ";
+        std::cin >> buf;
+
+        std::cout << "If correct - enter 'y': ";
+        symbol = _getch();
+        std::cout << symbol << '\n';
+    } while (symbol != 'y' || buf.size() > MONTH_LENGTH);
+
+    // записываем месяц в файл
+    // перемещаем курсор на позицию с месяцем
+    finout.seekp(POS_MONTH, std::ios::beg);
+
+    // записываем месяц
+    finout << buf;
+
+    // вводим день недели первого числа месяца
+    do
+    {
+        std::cout << "Enter weekday of 1st day of month\n";
+        std::cout << "(1 - MON, 2 - TUE, 3 - WEN, 4 - THU, 5 - FRI, 6 - SAT, 7 - SUN): ";
+        std::cin >> buf;
+
+        std::cout << "If correct - enter 'y': ";
+        symbol = _getch();
+        std::cout << symbol << '\n';
+    } while (symbol != 'y' || buf.size() > WEEK_LENGTH);
+
+    // записываем день недели в файл
+    // перемещаем курсор на позицию с днем недели
+    finout.seekp(POS_WEEK, std::ios::beg);
+
+    // записываем день недели
+    finout << buf;
+
+    // вводим количество рабочих часов в минутах
+    do
+    {
+        std::cout << "Enter work time in minutes:";
+        std::cin >> buf;
+
+        std::cout << "If correct - enter 'y': ";
+        symbol = _getch();
+        std::cout << symbol << '\n';
+    } while (symbol != 'y' || buf.size() > WORK_TIME_LENGTH);
+
+    // записываем количество рабочих часов в файл
+    // перемещаем курсор на позицию с количеством рабочих часов
+    finout.seekp(POS_WORK_TIME, std::ios::beg);
+
+    // записываем количество рабочих часов
+    finout << buf;
+
+    // вводим обеденное время в минутах
+    do
+    {
+        std::cout << "Enter dinner time in minutes:";
+        std::cin >> buf;
+
+        std::cout << "If correct - enter 'y': ";
+        symbol = _getch();
+        std::cout << symbol << '\n';
+    } while (symbol != 'y' || buf.size() > DINNER_TIME_LENGTH);
+
+    // записываем обеденное время в файл
+    // перемещаем курсор на позицию с обеденным временем
+    finout.seekp(POS_DINNER_TIME, std::ios::beg);
+
+    // записываем обеденное время
+    finout << buf;
+
+    finout.close();
+}
+
+// приветствие пользователя
+void wt::TimeControl::WelcomeUser()
+{
+    // объект для чтения
+    std::ifstream fin(FILE_NAME);
+
+    // перемещаем курсор на позицию ввода имени для чтения
+    fin.seekg(POS_NAME, std::ios::beg);
+
+    // буфер для имени
+    char name[NAME_LENGTH];
+
+    // чтение имени
+    fin.read(name, NAME_LENGTH);
+
+    // вывод приветствия на экран
+    std::cout << "\nHello, ";
+    for (int i = 0; i < NAME_LENGTH; ++i)
+    {
+        // пробелы не выводим
+        if (name[i] != ' ')
+        {
+            std::cout << name[i];
+        };
+    };
+    std::cout << "!\n";
+
+    fin.close();
 }

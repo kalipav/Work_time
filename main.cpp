@@ -13,6 +13,11 @@ int main ()
         return 0;
     };
 
+    // приветствие пользователя
+    wt::TimeControl::WelcomeUser();
+
+    cout << "Enter 'h' for help.\n";
+
     // переменная для записи команды
     char command;
 
@@ -20,7 +25,6 @@ int main ()
     for (;;)
     {
         // ввод команды
-        cout << "Enter 'h' for help.\n";
         cout << "> ";
     	cin >> command;
 
@@ -71,6 +75,4 @@ int main ()
         	cout << "Unknown command.\n";
         }
     };
-
-    return 0;
 }
