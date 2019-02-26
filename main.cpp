@@ -4,7 +4,7 @@
 
 int main ()
 {
-    std::cout << "\tWORK TIME CONTROL\n\n";
+    std::cout << "\tWORK TIME CONTROL\n";
 
     // проверить целостность файла, поля
     if (!wt::TimeControl::Check())
@@ -25,15 +25,8 @@ int main ()
     for (;;)
     {
         // ввод команды
-        cout << "> ";
+        cout << "\n> ";
     	cin >> command;
-
-        // проверить целостность файла, поля
-        if (!wt::TimeControl::Check())
-        {
-            std::cout << "Errors found. Exit...\n";
-            break;
-        };
 
         switch (command)
         {
@@ -73,6 +66,13 @@ int main ()
 
         default:
         	cout << "Unknown command.\n";
-        }
+        };
+
+        // проверить целостность файла, поля
+        if (!wt::TimeControl::Check())
+        {
+            std::cout << "Errors found. Exit...\n";
+            break;
+        };
     };
 }

@@ -2,13 +2,14 @@
 #define _TIMECONTROL_H_
 
     // константы, контролирующие корректность ввода пользователя
-#define MIN_DAY    1
-#define MAX_DAY    31
-#define MIN_HOUR   0
-#define MAX_HOUR   23
-#define MIN_MINUTE 0
-#define MAX_MINUTE 59
-#define FILE_NAME  "Data.wt"
+#define MIN_DAY            1
+#define MAX_DAY            31
+#define MIN_HOUR           0
+#define MAX_HOUR           23
+#define MIN_MINUTE         0
+#define MAX_MINUTE         59
+#define FILE_NAME          "Data.wt"
+#define MAX_CONVERT_LENGTH 4
 
     // длины полей для размещения информации в файле
 #define NAME_LENGTH        16
@@ -32,6 +33,39 @@
 #define POS_WEEK        37
 #define POS_WORK_TIME   41
 #define POS_DINNER_TIME 48
+
+    // позиции для блокировки дней, которых нет в месяце
+#define SYMBOL_BLOCK 'X'
+#define POS_BLOCK_29 448
+#define POS_BLOCK_30 462
+#define POS_BLOCK_31 476
+
+    // месяцы
+enum MONTHS {
+    JANUARY = 1,
+    FEBRUARY,
+    MARCH,
+    APRIL,
+    MAY,
+    JUNE,
+    JULY,
+    AUGUST,
+    SEPTEMBER,
+    OCTOBER,
+    NOVEMBER,
+    DECEMBER
+};
+
+    // дни недели
+enum WEEK_DAYS {
+    MONDAY,
+    TUESDAY,
+    WEDNESDAY,
+    THURSDAY,
+    FRIDAY,
+    SATURDAY,
+    SUNDAY
+};
 
 #include <string>
 #include <iostream>
@@ -67,7 +101,7 @@ namespace wt
         static void ConvertIntToChar (const int&, char*);
 
         // преобразование char в int
-        static int ConvertCharToInt (const char*);
+        static int ConvertCharToInt (char*, const int&);
 
     public:
         // конструктор
@@ -102,6 +136,9 @@ namespace wt
 
         // приветствие пользователя
         static void WelcomeUser();
+
+        // установка количества дней в файле в зависимости от месяца
+        static void SetDays();
     };
 };
 

@@ -14,17 +14,69 @@ wt::TimeControl::TimeControl()
 }
 
 // преобразование char в int
-// [in] const char* - массив, состоящий из 2-х символов
+// [in] const char* - массив
+// [in] const int& - длина массива
 // [out] int - преобразованное значение
-int wt::TimeControl::ConvertCharToInt (const char* p_MAS_CHAR)
+int wt::TimeControl::ConvertCharToInt (char* p_MAS_CHAR, const int& r_LENGTH)
 {
+    // проверка на длину массива
+    if (r_LENGTH > MAX_CONVERT_LENGTH || r_LENGTH <= 0)
+    {
+        std::cout << "Error! Convertation failed. Wrong length.\n";
+        abort();
+    };
+    /*
+    // проверка на наличие исключительно цифр в массиве
+    for (int i = 0; i < r_LENGTH; ++i)
+    {
+        // символ '0' - это 48 в десятич. системе, '1' = 49, ..., '9' = 57
+        if ((int)p_MAS_CHAR[i] < 48 || (int)p_MAS_CHAR[i] > 57)
+        {
+            std::cout << "Error! Try to convert letter.\n";
+            abort();
+        }
+    };
+    */
+    // начальное значение числа
     int number = 0;
 
+    // буфер для символа при перевороте
+    char buf;
+
+    // переворачиваем массив для корректности разрядов
+    if (r_LENGTH == 2)
+    {
+        // меняем местами элементы массива
+        buf = p_MAS_CHAR[0];
+        p_MAS_CHAR[0] = p_MAS_CHAR[1];
+        p_MAS_CHAR[1] = buf;
+    }
+    else if (r_LENGTH == 3)
+    {
+        // меняем местами 0-ой и 2-ой элементы
+        buf = p_MAS_CHAR[0];
+        p_MAS_CHAR[0] = p_MAS_CHAR[2];
+        p_MAS_CHAR[2] = buf;
+    }
+    else if (r_LENGTH == 4)
+    {
+        // меняем местами 0-ой и 3-ий, 1-ый и 2-ой элементы
+        buf = p_MAS_CHAR[0];
+        p_MAS_CHAR[0] = p_MAS_CHAR[3];
+        p_MAS_CHAR[3] = buf;
+        buf = p_MAS_CHAR[1];
+        p_MAS_CHAR[1] = p_MAS_CHAR[2];
+        p_MAS_CHAR[2] = buf;
+    };
+
+    // переводим число
 	for (int i = 0; i < 10; ++i)
 	{
         // символ '0' - это 48 в десятич. системе, '1' = 49, ..., '9' = 57
-        if (*p_MAS_CHAR == 48 + i) number += i * 10;
-	    if (*(p_MAS_CHAR+1) == 48 + i) number += i;
+        if (p_MAS_CHAR[0] == 48 + i && r_LENGTH >= 1) number += i;
+        if (p_MAS_CHAR[1] == 48 + i && r_LENGTH >= 2) number += i * 10;
+        if (p_MAS_CHAR[2] == 48 + i && r_LENGTH >= 3) number += i * 100;
+        if (p_MAS_CHAR[3] == 48 + i && r_LENGTH >= 4) number += i * 1000;
 	};
 
 	return number;
@@ -32,7 +84,7 @@ int wt::TimeControl::ConvertCharToInt (const char* p_MAS_CHAR)
 
 // вывод времени
 void wt::TimeControl::Calculate()
-{
+{/*
     // создаем объект для вывода информации из файла
     std::ifstream fin ("Data.wt");
 
@@ -165,7 +217,7 @@ void wt::TimeControl::Calculate()
 		}
 	};
 	fin.close();
-}
+*/}
 
 // показать подробно рабочее время
 void wt::TimeControl::Show()
@@ -798,7 +850,7 @@ void wt::TimeControl::FillTemplate()
         std::cout << "If correct - enter 'y': ";
         symbol = _getch();
         std::cout << symbol << '\n';
-    } while (symbol != 'y' || buf.size() > YEAR_LENGTH);
+    } while (symbol != 'y' || buf.size() != YEAR_LENGTH);
 
     // записываем год в файл
     // перемещаем курсор на позицию с годом
@@ -821,6 +873,12 @@ void wt::TimeControl::FillTemplate()
     // записываем месяц в файл
     // перемещаем курсор на позицию с месяцем
     finout.seekp(POS_MONTH, std::ios::beg);
+
+    // если в месяце меньше цифр, чем длина поля, заполнить нулями пустые поля
+    if (buf.size() < MONTH_LENGTH)
+    {
+        finout << '0';
+    };
 
     // записываем месяц
     finout << buf;
@@ -847,7 +905,7 @@ void wt::TimeControl::FillTemplate()
     // вводим количество рабочих часов в минутах
     do
     {
-        std::cout << "Enter work time in minutes:";
+        std::cout << "Enter work time in minutes: ";
         std::cin >> buf;
 
         std::cout << "If correct - enter 'y': ";
@@ -859,13 +917,22 @@ void wt::TimeControl::FillTemplate()
     // перемещаем курсор на позицию с количеством рабочих часов
     finout.seekp(POS_WORK_TIME, std::ios::beg);
 
+    // пустые поля заполняем нулями
+    if (buf.size() < WORK_TIME_LENGTH)
+    {
+        for (int i = 0; i < WORK_TIME_LENGTH - buf.size(); ++i)
+        {
+            finout << '0';
+        }
+    };
+
     // записываем количество рабочих часов
     finout << buf;
 
     // вводим обеденное время в минутах
     do
     {
-        std::cout << "Enter dinner time in minutes:";
+        std::cout << "Enter dinner time in minutes: ";
         std::cin >> buf;
 
         std::cout << "If correct - enter 'y': ";
@@ -877,10 +944,22 @@ void wt::TimeControl::FillTemplate()
     // перемещаем курсор на позицию с обеденным временем
     finout.seekp(POS_DINNER_TIME, std::ios::beg);
 
+    // пустые поля заполняем нулями
+    if (buf.size() < DINNER_TIME_LENGTH)
+    {
+        for (int i = 0; i < DINNER_TIME_LENGTH - buf.size(); ++i)
+        {
+            finout << '0';
+        }
+    };
+
     // записываем обеденное время
     finout << buf;
 
     finout.close();
+
+    // устанавливаем количество дней в файле
+    SetDays();
 }
 
 // приветствие пользователя
@@ -911,4 +990,97 @@ void wt::TimeControl::WelcomeUser()
     std::cout << "!\n";
 
     fin.close();
+}
+
+// установка количества дней в файле в зависимости от месяца
+void wt::TimeControl::SetDays()
+{
+    // объект ввода/вывода
+    std::fstream finout (FILE_NAME, std::ios::in | std::ios::out);
+
+    // длина буфера для считывания месяца и года (выбираем больший размер)
+    int length = YEAR_LENGTH > MONTH_LENGTH ? YEAR_LENGTH : MONTH_LENGTH;
+
+    // буфер
+    char buf[length];
+
+    // устанавливаем позицию для считывания года из файла
+    finout.seekg(POS_YEAR, std::ios::beg);
+
+    // считываем из файла год
+    for (int i = 0; i < YEAR_LENGTH; ++i)
+    {
+        buf[i] = finout.get();
+    };
+
+    // преобразуем год в int
+    int year = ConvertCharToInt(buf, YEAR_LENGTH);
+
+    // устанавливаем позицию для считывания месяца из файла
+    finout.seekg(POS_MONTH, std::ios::beg);
+
+    // считываем из файла месяц
+    for (int i = 0; i < MONTH_LENGTH; ++i)
+    {
+        buf[i] = finout.get();
+    };
+
+    // преобразуем месяц в int
+    int month = ConvertCharToInt(buf, MONTH_LENGTH);
+
+    // количество дней в месяце
+    int days;
+
+    // определяем количество дней в месяце
+    if (month == JANUARY ||
+        month == MARCH   ||
+        month == MAY     ||
+        month == JULY    ||
+        month == AUGUST  ||
+        month == OCTOBER ||
+        month == DECEMBER)
+    {
+        days = 31;
+    }
+    else if (month == APRIL     ||
+             month == JUNE      ||
+             month == SEPTEMBER ||
+             month == NOVEMBER)
+    {
+        days = 30;
+    }
+
+    // февраль невисокосного года
+    else if (month == FEBRUARY && year % 4 != 0)
+    {
+        days = 29;
+    }
+
+    // февраль високосного года
+    else if (month == FEBRUARY && year % 4 == 0)
+    {
+        days = 28;
+    };
+
+        // блокируем в файле дни, которых нет в месяце
+    // если дней меньше 31 - блокируем 31-ое число
+    if (days < 31)
+    {
+        finout.seekg(POS_BLOCK_31, std::ios::beg);
+        finout << SYMBOL_BLOCK;
+    };
+
+    // если дней меньше 30 - блокируем 30-ое число
+    if (days < 30)
+    {
+        finout.seekg(POS_BLOCK_30, std::ios::beg);
+        finout << SYMBOL_BLOCK;
+    };
+
+    // если дней меньше 29 - блокируем 29-ое число
+    if (days < 29)
+    {
+        finout.seekg(POS_BLOCK_29, std::ios::beg);
+        finout << SYMBOL_BLOCK;
+    };
 }
