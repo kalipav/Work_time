@@ -64,6 +64,30 @@ int main ()
         case 'q':
             return 0;
 
+        // установить следующий месяц
+        case 'n':
+            {
+                /*// ключ для установки следующего месяца
+                std::string password = "next";
+
+                // переменная для ввода ключа пользователем (используется для защиты от случайного сброса)
+                std::string userKey;
+
+                // ввод ключа
+                cout << "Enter \"next\" for activate:\n";
+                cout << "> ";
+                cin >> userKey;
+
+                // проверка корректности ввода
+                if (password == userKey)
+                {*/
+                    wt::TimeControl::SetNextMonth();
+                //};
+
+                std::cout << "Next month set.\n";
+            };
+            break;
+
         default:
         	cout << "Unknown command.\n";
         };

@@ -19,12 +19,12 @@
 #define WORK_TIME_LENGTH   4
 #define DINNER_TIME_LENGTH 3
 #define COUNT_DAYS         31
-#define DAY_LENGTH         9
+#define DAY_LENGTH         8
 
     // флаги файла
 #define BEGIN_FILE_WORD "beg"
 #define END_FILE_WORD   "end"
-#define FILE_LENGTH     485
+#define FILE_LENGTH     454
 
     // позиции параметров в файле
 #define POS_NAME        6
@@ -36,9 +36,9 @@
 
     // позиции для блокировки дней, которых нет в месяце
 #define SYMBOL_BLOCK 'X'
-#define POS_BLOCK_29 448
-#define POS_BLOCK_30 462
-#define POS_BLOCK_31 476
+#define POS_BLOCK_29 420
+#define POS_BLOCK_30 433
+#define POS_BLOCK_31 446
 
     // месяцы
 enum MONTHS {
@@ -53,18 +53,20 @@ enum MONTHS {
     SEPTEMBER,
     OCTOBER,
     NOVEMBER,
-    DECEMBER
+    DECEMBER,
+    ALL_MONTHS = 12
 };
 
     // дни недели
 enum WEEK_DAYS {
-    MONDAY,
+    MONDAY = 1,
     TUESDAY,
     WEDNESDAY,
     THURSDAY,
     FRIDAY,
     SATURDAY,
-    SUNDAY
+    SUNDAY,
+    ALL_WEEK_DAYS = 7
 };
 
 #include <string>
@@ -98,10 +100,24 @@ namespace wt
         } m_buffer;
 
         // преобразование int в char
-        static void ConvertIntToChar (const int&, char*);
+        // по умолчанию - 1 элемент
+        static void ConvertIntToChar (const int&, char*, const int& r_LENGTH = 1);
 
         // преобразование char в int
-        static int ConvertCharToInt (char*, const int&);
+        // длина массива по умолчанию = 1
+        static int ConvertCharToInt (const char*, const int& r_LENGTH = 1);
+
+        // создать файл по шаблону
+        static bool CreateTemplate();
+
+        // проверка на целостность файла
+        static bool IsCrushed(std::fstream&);
+
+        // заполнение шаблона
+        static void FillTemplate();
+
+        // установка количества дней в файле в зависимости от месяца
+        static void SetDays();
 
     public:
         // конструктор
@@ -125,20 +141,11 @@ namespace wt
         // проверка файла
         static bool Check();
 
-        // создать файл по шаблону
-        static bool CreateTemplate();
-
-        // проверка на целостность файла
-        static bool IsCrushed(std::fstream&);
-
-        // заполнение шаблона
-        static void FillTemplate();
-
         // приветствие пользователя
         static void WelcomeUser();
 
-        // установка количества дней в файле в зависимости от месяца
-        static void SetDays();
+        // установить следующий месяц
+        static void SetNextMonth();
     };
 };
 
