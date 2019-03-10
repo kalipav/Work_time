@@ -35,6 +35,7 @@
 #define POS_DINNER_TIME 48
 
     // позиции для блокировки дней, которых нет в месяце
+#define SYMBOL_EMPTY ' '
 #define SYMBOL_BLOCK 'X'
 #define POS_BLOCK_29 420
 #define POS_BLOCK_30 433
@@ -69,6 +70,13 @@ enum WEEK_DAYS {
     ALL_WEEK_DAYS = 7
 };
 
+    // флаги для метода AddCorDel: добавление, коррекция, удаление рабочего дня
+enum Status {
+    ADDITION,
+    CORRECTION,
+    DELETION
+};
+
 #include <string>
 #include <iostream>
 #include <windows.h>
@@ -82,9 +90,6 @@ using std::string;
 
 namespace wt
 {
-    // флаги для метода Add: добавление и коррекция
-    enum Add_status {ADD, CORRECTION};
-
     // класс, управляющий подсчетом времени
     class TimeControl
     {
@@ -92,13 +97,14 @@ namespace wt
         // структура буфера
         struct dayTime
         {
-            int day:8;
-            int startHour:4;
-            int finishHour:4;
-            int startMinute:8;
-            int finishMinute:8;
+            int day          : 8;
+            int startHour    : 8;
+			int startMinute  : 8;
+            int finishHour   : 8;
+            int finishMinute : 8;
         } m_buffer;
 
+    private:
         // преобразование int в char
         // по умолчанию - 1 элемент
         static void ConvertIntToChar (const int&, char*, const int& r_LENGTH = 1);
@@ -118,25 +124,22 @@ namespace wt
 
         // установка количества дней в файле в зависимости от месяца
         static void SetDays();
+        
+        // вернуть принт дня недели даты
+        static std::string GetWeekDay(const int&);
 
     public:
         // конструктор
         TimeControl();
 
-        // добавить рабочий день
-        void Add(const wt::Add_status& flag = ADD);
-
-        // очистить время дня
-        //static void Delete();
-
-        // сбросить всё рабочее время
-        static void Reset();
+        // добавить/откорректировать/удалить рабочий день
+        void AddCorDel(const Status&);
 
         // показать подробно рабочее время
-        static void Show();
+        static void Show();						/////////////////////////////////////////////////////////////////////////////
 
         // вывод времени
-        static void Calculate();
+        static void Calculate();				 /////////////////////////////////////////////////////////////////////////////
 
         // проверка файла
         static bool Check();

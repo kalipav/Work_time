@@ -1,18 +1,20 @@
 ﻿// класс, управляющий подсчетом времени
 #include "TimeControl.h"
-#include "TimeControl.cpp"
+
+// ключ для установки следующего месяца
+#define PASSWORD "next"
 
 int main ()
 {
     std::cout << "\tWORK TIME CONTROL\n";
-
+	
     // проверить целостность файла, поля
     if (!wt::TimeControl::Check())
     {
         std::cout << "Errors found. Exit...\n";
         return 0;
     };
-
+    
     // приветствие пользователя
     wt::TimeControl::WelcomeUser();
 
@@ -26,67 +28,64 @@ int main ()
     {
         // ввод команды
         cout << "\n> ";
-    	cin >> command;
+    	command = _getch();
+		std::cout << command << "\n";
 
         switch (command)
         {
         // добавить рабочий день
         case 'a':
         	{
-        		wt::TimeControl dayParameters;
-        		dayParameters.Add();
+                wt::TimeControl dayParams;
+				dayParams.AddCorDel(ADDITION); // флаг на добавление
         	};
             break;
 
         // откорректировать рабочий день
         case 'c':
         	{
-        		wt::TimeControl dayParameters;
-                dayParameters.Add(wt::CORRECTION); // флаг на коррекцию
+                wt::TimeControl dayParams;
+                dayParams.AddCorDel(CORRECTION); // флаг на коррекцию
         	};
             break;
 
-       // case 'd':
-           // wt::TimeControl::Delete();
-           // break;
+        // удалить рабочий день
+        case 'd':
+            {
+                wt::TimeControl dayParams;
+                dayParams.AddCorDel(DELETION); // флаг на удаление
+            };
+            break;
 
         // показать подробно рабочее время
         case 's':
         	wt::TimeControl::Show();
             break;
 
-        // сбросить всё рабочее время
-        case 'r':
-        	wt::TimeControl::Reset();
+        // установить следующий месяц
+        case 'n':
+            {
+                // переменная для ввода ключа пользователем (используется для защиты от случайного сброса)
+                std::string userKey;
+
+                // ввод ключа
+                cout << "Enter \""<< PASSWORD << "\" for activate:\n";
+                cout << "> ";
+                cin >> userKey;
+
+                // проверка корректности ввода
+                if (PASSWORD == userKey)
+                {
+                    wt::TimeControl::SetNextMonth();
+                };
+
+                std::cout << "Next month set.\n";
+            };
             break;
 
         // выйти из программы
         case 'q':
             return 0;
-
-        // установить следующий месяц
-        case 'n':
-            {
-                /*// ключ для установки следующего месяца
-                std::string password = "next";
-
-                // переменная для ввода ключа пользователем (используется для защиты от случайного сброса)
-                std::string userKey;
-
-                // ввод ключа
-                cout << "Enter \"next\" for activate:\n";
-                cout << "> ";
-                cin >> userKey;
-
-                // проверка корректности ввода
-                if (password == userKey)
-                {*/
-                    wt::TimeControl::SetNextMonth();
-                //};
-
-                std::cout << "Next month set.\n";
-            };
-            break;
 
         default:
         	cout << "Unknown command.\n";
