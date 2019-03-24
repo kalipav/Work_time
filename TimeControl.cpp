@@ -14,12 +14,15 @@ wt::TimeControl::TimeControl()
 }
 
 // преобразование char в int
-// [in] const char* - массив
-// [in] const int& - длина массива, по умолчанию = 1
-// [out] int - преобразованное значение
-int wt::TimeControl::ConvertCharToInt (const char* p_MAS_CHAR, const int& r_LENGTH)
+// [in]  const char* - массив
+// [in]  const int&  - длина массива, по умолчанию = 1
+// [out] int         - преобразованное значение
+int wt::TimeControl::ConvertCharToInt(const char* p_MAS_CHAR, const int& r_LENGTH)
 {
-	// копия массива
+    // максимальная длина преобразуемого массива
+	const int MAX_CONVERT_LENGTH = 4;
+    
+    // копия массива
     char p_char_copy[MAX_CONVERT_LENGTH];
 
     // копируем массив
@@ -108,7 +111,7 @@ int wt::TimeControl::ConvertCharToInt (const char* p_MAS_CHAR, const int& r_LENG
 
 		if (r_LENGTH == MAX_CONVERT_LENGTH)
 		{
-			if (p_char_copy[0] == 48 + i)
+			if (p_char_copy[3] == 48 + i)
 			{
 				number += i * 1000;
 			}
@@ -160,263 +163,64 @@ void wt::TimeControl::ConvertIntToChar (const int& r_NUMBER, char* p_massChar, c
     };
 }
 
-// вывод времени
-void wt::TimeControl::Calculate()
-{/*
-    // создаем объект для вывода информации из файла
-    std::ifstream fin ("Data.wt");
-
-    // проверка открылся ли файл
-	if (!fin)
-	{
-		cout << "Error! File not open.\n";
-	}
-	else
-	{
-        // перемещаем указатель в начало файла
-		fin.seekg (0, std::ios::beg);
-
-        // если первый символ в файле - 'v', то с файлом все в порядке
-        if (fin.get() == 'v')
-		{
-            // массив для чисел, состоящих из 2-х цифр
-            char masChar[2] = {0, 0};
-
-            // переменная, содержащая текущее значение
-            int bufferMinutes = 0;
-
-            // masChar[0] не используется, т.к. для поиска достаточно одной буферной переменной
-            masChar[1] = fin.get();
-
-            // пока не будет достигнут конец файла, выполянять ряд операций
-			while (!fin.eof())
-			{
-                // если найдена точка
-                if (masChar[1] == '.')
-				{
-                    // считать след. символ
-                    masChar[1] = fin.get();
-
-                    // если вместо конкретного часа установлен пробел,
-                    // значит время не занесено и учитывать этот день не нужно
-                    if (masChar[1] == ' ')
-					{
-						continue;
-					}
-
-                    // если установлена дата, то ее необходимо учесть
-                    else
-					{
-                        // создаем объект
-						wt::TimeControl bufferDate;
-
-                        // переписываем первую цифру стартового часа из 1-го элемента (это не ' ')
-                        masChar[0] = masChar[1];
-
-                        // считываем вторую цифру стартового часа
-                        masChar[1] = fin.get();
-
-                        // конвертируем
-						bufferDate.m_buffer.startHour = ConvertCharToInt(masChar);
-
-                        // перемещаем указатель на 1 позицию вперед (пропускаем двоеточие и тире)
-						fin.seekg(1, std::ios::cur);
-
-                        // считываем первую цифру стартовых минут
-                        masChar[0] = fin.get();
-
-                        // считываем вторую цифру стартовых минут
-                        masChar[1] = fin.get();
-
-                        // конвертируем
-						bufferDate.m_buffer.startMinute = ConvertCharToInt(masChar);
-
-                        // перемещаем указатель на 1 позицию вперед (пропускаем двоеточие и тире)
-						fin.seekg(1, std::ios::cur);
-
-                        // считываем первую цифру финишных часов
-                        masChar[0] = fin.get();
-
-                        // считываем вторую цифру финишных часов
-                        masChar[1] = fin.get();
-
-                        // конвертируем
-						bufferDate.m_buffer.finishHour = ConvertCharToInt(masChar);
-
-                        // перемещаем указатель на 1 позицию вперед (пропускаем двоеточие и тире)
-						fin.seekg(1, std::ios::cur);
-
-                        // считываем первую цифру финишных минут
-                        masChar[0] = fin.get();
-
-                        // считываем вторую цифру финишных минут
-                        masChar[1] = fin.get();
-
-                        // конвертируем
-						bufferDate.m_buffer.finishMinute = ConvertCharToInt(masChar);
-
-						// добавляет реальное рабочее время за день
-                        bufferMinutes += bufferDate.m_buffer.finishHour * 60 +
-                                         bufferDate.m_buffer.finishMinute    -
-                                        (bufferDate.m_buffer.startHour  * 60 +
-                                         bufferDate.m_buffer.startMinute);
-
-                        // вычитаем 8ч 45м (525м)                                     ///////////////////////////////////////////////////
-                        bufferMinutes -= 525;
-					};
-				}
-				else
-				{
-                    // считываем один символ из файла
-					masChar[1] = fin.get();
-				}
-
-			}; // закрывает while
-
-            // условие для различия времени на отработку и свободного времени
-			if (bufferMinutes > 0)
-			{
-				cout << "----------\n";
-				cout << "Free time: " << bufferMinutes/60 << "h " << bufferMinutes%60 << "m.\n";
-				cout << "----------\n";
-			}
-			else
-			{
-				cout << "-------------\n";
-				cout << "Time to work: " << (-1)*bufferMinutes/60 << "h " << (-1)*bufferMinutes%60 << "m.\n";
-				cout << "-------------\n";
-			};
-		}
-
-        // файл не прошел проверку на целостность
-		else
-        {
-			cout << "File crushed.\n";
-		}
-	};
-	fin.close();
-*/}
-
-// показать подробно рабочее время
-void wt::TimeControl::Show()
-{
-    // объект для вывода информации из файла
-    std::ifstream fin ("Data.wt");
-
-    // проверка открылся ли файл
-	if (!fin)
-	{
-		cout << "Error! File not open.\n";
-	}
-	else
-	{
-        // переместить указатель в начало файла
-		fin.seekg (0, std::ios::beg);
-
-        // если первый символ в файле - 'v', то с файлом все в порядке
-        if (fin.get() == 'v')
-		{
-            // буферная переменная для считывания из файла
-			char buf;
-
-            // продолжать считывание пока не будет достигнут конец файла
-			while (!fin.eof())
-			{
-                // считать символ
-                buf = fin.get();
-
-                // вывод символа
-				cout << buf;
-			};
-			cout << endl;
-		}
-
-        // файл не прошел проверку на целостность
-		else
-		{
-			cout << "File crushed.\n";
-		}
-	};
-	fin.close();
-}
-
 // добавить/откорректировать/удалить рабочий день
 // [in] const wt::Add_status& - флаг добавления/корректировки/удаления
 void wt::TimeControl::AddCorDel(const Status& flag)
 {
-	// длина массива для ввода символов
+    // индикация входа в метод
+    if (flag == ADDITION)
+    {
+        std::cout << "Date addition.\n";
+    }
+    else if (flag == CORRECTION)
+    {
+        std::cout << "Date correction.\n";
+    }
+    else if (flag == DELETION)
+    {
+        std::cout << "Date deletion.\n";
+    };
+
+    // длина массива для ввода символов часов и минут
 	const int symBufSize = 2;
 
-    // массив для ввода символов
+    // массив для ввода символов часов и минут
     char symBuf[symBufSize];
 
-    // осуществляем ввод даты
-    do
-    {
-        std::cout << "Enter date: ";
-        symBuf[0] = _getch();
+	// ввод даты
+	do
+	{
+		std::cout << "Enter date: ";
+		symBuf[0] = _getch();
 		std::cout << symBuf[0];
 		symBuf[1] = _getch();
 		std::cout << symBuf[1] << '\n';
-		m_buffer.day = ConvertCharToInt(symBuf, symBufSize);
-	} while (m_buffer.day < MIN_DAY ||
+        m_buffer.day = ConvertCharToInt(symBuf, symBufSize);
+    } while (m_buffer.day < MIN_DAY ||
 			 m_buffer.day > MAX_DAY);
 
-	// если добавляем или корректируем дату, то вводим начальное и конечное время
-    if (flag == ADDITION || flag == CORRECTION)
-    {
-		// осуществляем ввод часов начала рабочего времени
-		do
-		{
-			std::cout << "Enter start hours: ";
-			symBuf[0] = _getch();
-			std::cout << symBuf[0];
-			symBuf[1] = _getch();
-			std::cout << symBuf[1] << '\n';
-			m_buffer.startHour = ConvertCharToInt(symBuf, symBufSize);
-		} while (m_buffer.startHour < MIN_HOUR ||
-				 m_buffer.startHour > MAX_HOUR);
-	
-		// осуществляем ввод минут начала рабочего времени
-		do
-		{
-			std::cout << "Enter start minutes: ";
-			symBuf[0] = _getch();
-			std::cout << symBuf[0];
-			symBuf[1] = _getch();
-			std::cout << symBuf[1] << '\n';
-			m_buffer.startMinute = ConvertCharToInt(symBuf, symBufSize);
-		} while (m_buffer.startMinute < MIN_MINUTE ||
-				 m_buffer.startMinute > MAX_MINUTE);
-
-		// осуществляем ввод часов конца рабочего времени
-		do
-		{
-			std::cout << "Enter finish hours: ";
-			symBuf[0] = _getch();
-			std::cout << symBuf[0];
-			symBuf[1] = _getch();
-			std::cout << symBuf[1] << '\n';
-			m_buffer.finishHour = ConvertCharToInt(symBuf, symBufSize);
-		} while (m_buffer.finishHour < MIN_HOUR ||
-				 m_buffer.finishHour > MAX_HOUR);
-
-		// осуществляем ввод минут конца рабочего времени
-		do
-		{
-			std::cout << "Enter finish minutes: ";
-			symBuf[0] = _getch();
-			std::cout << symBuf[0];
-			symBuf[1] = _getch();
-			std::cout << symBuf[1] << '\n';
-			m_buffer.finishMinute = ConvertCharToInt(symBuf, symBufSize);
-		} while (m_buffer.finishMinute < MIN_MINUTE ||
-				 m_buffer.finishMinute > MAX_MINUTE);
-	};
-
+        // проверяем доступность даты по информации из файла
     // создаем объект для работы с файлом
     std::fstream finout (FILE_NAME, std::ios::in | std::ios::out);
 
+    // позиция даты, указывающая на поле с часами и минутами
+    int pos = GetPosOfDay(m_buffer.day);
+    
+    // если произошла ошибка в поиске позиции даты
+    if (pos == ERROR_POS)
+    {
+        std::cout << "Date hasn't found, error position.\n";
+        finout.close();
+        return;
+    }
+
+    // иначе устанавливаем указатель на позицию текущей даты
+    else
+    {
+        finout.seekg(pos, std::ios::beg);
+    };
+
+    /*
     // длина буфера для поиска даты в файле
     const int BUF_LENGTH = 5;
 
@@ -482,6 +286,7 @@ void wt::TimeControl::AddCorDel(const Status& flag)
             break;
         };
     };
+    */
 
     // символ для проверки даты, считываем первый байт даты
     char control = finout.get();
@@ -515,12 +320,62 @@ void wt::TimeControl::AddCorDel(const Status& flag)
 	int filePointer = finout.tellg();
     --filePointer;
 
-    // устанавливаем указатель
+    // устанавливаем указатель на запись часов и минут
     finout.seekp(filePointer, std::ios::beg);
 
-    // записываем дату, если процесс добавления/корректировки
+        // вводим часы и минуты
+	// если добавляем или корректируем дату, то вводим начальное и конечное время
     if (flag == ADDITION || flag == CORRECTION)
     {
+		// осуществляем ввод часов начала рабочего времени
+		do
+		{
+			std::cout << "Enter start hours: ";
+			symBuf[0] = _getch();
+			std::cout << symBuf[0];
+			symBuf[1] = _getch();
+			std::cout << symBuf[1] << '\n';
+			m_buffer.startHour = ConvertCharToInt(symBuf, symBufSize);
+		} while (m_buffer.startHour < MIN_HOUR ||
+				 m_buffer.startHour > MAX_HOUR);
+	
+		// осуществляем ввод минут начала рабочего времени
+		do
+		{
+			std::cout << "Enter start minutes: ";
+			symBuf[0] = _getch();
+			std::cout << symBuf[0];
+			symBuf[1] = _getch();
+			std::cout << symBuf[1] << '\n';
+			m_buffer.startMinute = ConvertCharToInt(symBuf, symBufSize);
+		} while (m_buffer.startMinute < MIN_MINUTE ||
+				 m_buffer.startMinute > MAX_MINUTE);
+
+		// осуществляем ввод часов конца рабочего времени
+		do
+		{
+			std::cout << "Enter finish hours: ";
+			symBuf[0] = _getch();
+			std::cout << symBuf[0];
+			symBuf[1] = _getch();
+			std::cout << symBuf[1] << '\n';
+			m_buffer.finishHour = ConvertCharToInt(symBuf, symBufSize);
+		} while (m_buffer.finishHour < MIN_HOUR ||
+				 m_buffer.finishHour > MAX_HOUR);
+
+		// осуществляем ввод минут конца рабочего времени
+		do
+		{
+			std::cout << "Enter finish minutes: ";
+			symBuf[0] = _getch();
+			std::cout << symBuf[0];
+			symBuf[1] = _getch();
+			std::cout << symBuf[1] << '\n';
+			m_buffer.finishMinute = ConvertCharToInt(symBuf, symBufSize);
+		} while (m_buffer.finishMinute < MIN_MINUTE ||
+				 m_buffer.finishMinute > MAX_MINUTE);
+
+            // записываем дату
         // буфер для часов и минут, состоит из двух символов
         const int BUF_MIN_HOUR_LENGTH = 2;
         char bufMinHour[BUF_MIN_HOUR_LENGTH];
@@ -565,10 +420,30 @@ void wt::TimeControl::AddCorDel(const Status& flag)
     // если флаг - удаление, записываем пустые символы
     else if (flag == DELETION)
     {
-        // записываем пустые символы
-        for (int i = 0; i < DAY_LENGTH; ++i)
+        // символ ввода
+        char symbol;
+
+        // запрашиваем подтверждение на удаление
+        std::cout << "If date is correct - enter 'y': ";
+        symbol = _getch();
+        std::cout << symbol << '\n';
+        
+        // если все верно - очищаем дату
+        if (symbol == 'y')
         {
-            finout.put(SYMBOL_EMPTY);
+            // записываем пустые символы
+            for (int i = 0; i < DAY_LENGTH; ++i)
+            {
+                finout.put(SYMBOL_EMPTY);
+            };
+        }
+
+        // иначе выходим из метода
+        else
+        {
+            std::cout << "Deletion canceled.\n";
+            finout.close();
+            return;
         };
     };
 
@@ -985,7 +860,7 @@ void wt::TimeControl::WelcomeUser()
     for (int i = 0; i < NAME_LENGTH; ++i)
     {
         // пробелы не выводим
-        if (name[i] != ' ')
+        if (name[i] != SYMBOL_EMPTY)
         {
             std::cout << name[i];
         };
@@ -1091,93 +966,40 @@ void wt::TimeControl::SetDays()
 // установить следующий месяц
 void wt::TimeControl::SetNextMonth()
 {
+    // индикация начала метода
+    std::cout << "Start to set next month.\n";
+
     // объект для чтения/записи
     std::fstream finout (FILE_NAME, std::ios::in | std::ios::out);
 
-        // проходим по файлу, очищаем дни
-    // длина буфера для поиска дней в файле
-    const int BUF_LENGTH = 5;
-
-    // буфер
-    char dayBuf[BUF_LENGTH];
-
-    // устанавливаем указатель на начало файла
-    finout.seekg(0, std::ios::beg);
-
-    // помещаем первые 5 символов в массив
-    for (int i = 0; i < BUF_LENGTH; ++i)
+    // проходим по файлу, очищаем дни
+    for (int i = MIN_DAY; i <= MAX_DAY; ++i)
     {
-        dayBuf[i] = finout.get();
-    };
+        // позиция даты
+        int pos;
 
-    // цикл очистки, for_break - индикатор выхода из цикла for
-    for (bool for_break = false;;)
-    {
-        // считываем из файла символы пока не встретим "day"
-        while (dayBuf[0] != 'd' || dayBuf[1] != 'a' || dayBuf[2] != 'y')
+        // вернуть позицию указанного дня в файле
+        pos = GetPosOfDay(i);
+
+        // если произошла ошибка в поиске позиции даты
+        if (pos == ERROR_POS)
         {
-            // смещаем элементы на -1
-            for (int i = 0; i < BUF_LENGTH - 1; ++i)
+            std::cout << "Date hasn't found, error position.\n";
+            return;
+        }
+
+        // иначе очистить часы и минуты даты
+        else
+        {
+            // устанавливаем указатель на позицию текущей даты
+            finout.seekg(pos, std::ios::beg);
+
+            // заполняем пробелами поле
+            for (int i = 0; i < DAY_LENGTH; ++i)
             {
-                dayBuf[i] = dayBuf[i+1];
-            };
-
-            // последнему элементу присваиваем новый символ из файла
-            dayBuf[BUF_LENGTH - 1] = finout.get();
-
-            // если 3 последних элемента равны "end" - выходим из метода
-            if (dayBuf[2] == 'e' && dayBuf[3] == 'n' && dayBuf[4] == 'd')
-            {
-                // можно выходить из цикла for, достигнут конец файла
-                for_break = true;
-
-                // выходим из while
-                break;
+                finout.put(SYMBOL_EMPTY);
             };
         };
-
-        // проверка на выход из цикла for, если достигнут конец файла
-        if (for_break)
-        {
-            break;
-        };
-
-            // проверяем 4-ый и 5-ый элементы массива (в них должен быть указан номер дня)
-        // длина буфера для размещения номера дня
-        const int DAY_NUMBER_CHAR_LENGTH = 2;
-
-        // буфер для номера дня
-        char dayNumberChar[DAY_NUMBER_CHAR_LENGTH];
-
-        // копируем в буфер номер дня (символы)
-        dayNumberChar[0] = dayBuf[3];
-        dayNumberChar[1] = dayBuf[4];
-
-        // переводим номер дня из char в int
-        int dayNumber = ConvertCharToInt(dayNumberChar, DAY_NUMBER_CHAR_LENGTH);
-
-        // проверяем корректность номера дня
-        if (dayNumber < MIN_DAY || dayNumber > MAX_DAY)
-        {
-            continue;
-        };
-
-        // устанавливаем указатель на чтение с последней позиции записи
-        finout.seekg(finout.tellp(), std::ios::beg);
-
-        // очищаем пространство и заполняем пробелами буфер
-        for (int i = 0; i < DAY_LENGTH; ++i)
-        {
-            finout.put(' ');
-
-            if (i < BUF_LENGTH)
-            {
-                dayBuf[i] = ' ';
-            };
-        };
-
-        // устанавливаем указатель на чтение с последней позиции записи
-        finout.seekp(finout.tellg(), std::ios::beg);
     };
 
         // считываем год из файла
@@ -1318,6 +1140,8 @@ void wt::TimeControl::SetNextMonth()
 
     // устанавливаем количество дней в файле в зависимости от вновь установленного месяца
     SetDays();
+    
+    std::cout << "Next month set.\n";
 }
 
 // вернуть принт дня недели даты
@@ -1380,4 +1204,243 @@ std::string wt::TimeControl::GetWeekDay(const int& r_DATE)
     };
 
     return str;
+}
+
+// вернуть позицию указанного дня в файле
+// возвращает -1, если не нашел указанный день
+// [in]  const int& - дата
+// [out] int        - позиция даты
+int wt::TimeControl::GetPosOfDay(const int& r_DATE)
+{
+	// объект для чтения/записи
+    std::fstream finout(FILE_NAME, std::ios::in | std::ios::out);
+
+        // проходим по файлу, очищаем дни
+    // длина буфера для поиска дней в файле
+    const int BUF_LENGTH = 5;
+
+    // буфер
+    char dayBuf[BUF_LENGTH];
+
+    // устанавливаем указатель на начало файла
+    finout.seekg(0, std::ios::beg);
+
+    // помещаем первые 5 символов в массив
+    for (int i = 0; i < BUF_LENGTH; ++i)
+    {
+        dayBuf[i] = finout.get();
+    };
+
+    // длина массива с датой
+    const int DATE_CHAR_LENGTH = 2;
+
+    // дата в виде символьного массива
+    char date_char[DATE_CHAR_LENGTH];
+
+    // преобразуем дату
+    ConvertIntToChar(r_DATE, date_char, DATE_CHAR_LENGTH);
+
+    // считываем из файла символы пока не встретим "day" и дату "--"
+    while (dayBuf[0] != 'd' || dayBuf[1] != 'a' || dayBuf[2] != 'y' || 
+           dayBuf[3] != date_char[0] || dayBuf[4] != date_char[1])
+    {
+        // смещаем элементы на -1
+        for (int i = 0; i < BUF_LENGTH - 1; ++i)
+        {
+            dayBuf[i] = dayBuf[i+1];
+        };
+
+        // последнему элементу присваиваем новый символ из файла
+        dayBuf[BUF_LENGTH - 1] = finout.get();
+
+        // если 3 последних элемента равны "end" - возвращаем значение "ошибочная позиция"
+        if (dayBuf[2] == 'e' && dayBuf[3] == 'n' && dayBuf[4] == 'd')
+        {
+            finout.close();
+            return ERROR_POS;
+        };
+    };
+    
+    // вернуть текущую позицию 
+    return finout.tellg();
+}
+
+// показать время отработки
+void wt::TimeControl::TimeToWork()
+{/*
+    // создаем объект для вывода информации из файла
+    std::ifstream fin ("Data.wt");
+
+    // проверка открылся ли файл
+	if (!fin)
+	{
+		cout << "Error! File not open.\n";
+	}
+	else
+	{
+        // перемещаем указатель в начало файла
+		fin.seekg (0, std::ios::beg);
+
+        // если первый символ в файле - 'v', то с файлом все в порядке
+        if (fin.get() == 'v')
+		{
+            // массив для чисел, состоящих из 2-х цифр
+            char masChar[2] = {0, 0};
+
+            // переменная, содержащая текущее значение
+            int bufferMinutes = 0;
+
+            // masChar[0] не используется, т.к. для поиска достаточно одной буферной переменной
+            masChar[1] = fin.get();
+
+            // пока не будет достигнут конец файла, выполянять ряд операций
+			while (!fin.eof())
+			{
+                // если найдена точка
+                if (masChar[1] == '.')
+				{
+                    // считать след. символ
+                    masChar[1] = fin.get();
+
+                    // если вместо конкретного часа установлен пробел,
+                    // значит время не занесено и учитывать этот день не нужно
+                    if (masChar[1] == ' ')
+					{
+						continue;
+					}
+
+                    // если установлена дата, то ее необходимо учесть
+                    else
+					{
+                        // создаем объект
+						wt::TimeControl bufferDate;
+
+                        // переписываем первую цифру стартового часа из 1-го элемента (это не ' ')
+                        masChar[0] = masChar[1];
+
+                        // считываем вторую цифру стартового часа
+                        masChar[1] = fin.get();
+
+                        // конвертируем
+						bufferDate.m_buffer.startHour = ConvertCharToInt(masChar);
+
+                        // перемещаем указатель на 1 позицию вперед (пропускаем двоеточие и тире)
+						fin.seekg(1, std::ios::cur);
+
+                        // считываем первую цифру стартовых минут
+                        masChar[0] = fin.get();
+
+                        // считываем вторую цифру стартовых минут
+                        masChar[1] = fin.get();
+
+                        // конвертируем
+						bufferDate.m_buffer.startMinute = ConvertCharToInt(masChar);
+
+                        // перемещаем указатель на 1 позицию вперед (пропускаем двоеточие и тире)
+						fin.seekg(1, std::ios::cur);
+
+                        // считываем первую цифру финишных часов
+                        masChar[0] = fin.get();
+
+                        // считываем вторую цифру финишных часов
+                        masChar[1] = fin.get();
+
+                        // конвертируем
+						bufferDate.m_buffer.finishHour = ConvertCharToInt(masChar);
+
+                        // перемещаем указатель на 1 позицию вперед (пропускаем двоеточие и тире)
+						fin.seekg(1, std::ios::cur);
+
+                        // считываем первую цифру финишных минут
+                        masChar[0] = fin.get();
+
+                        // считываем вторую цифру финишных минут
+                        masChar[1] = fin.get();
+
+                        // конвертируем
+						bufferDate.m_buffer.finishMinute = ConvertCharToInt(masChar);
+
+						// добавляет реальное рабочее время за день
+                        bufferMinutes += bufferDate.m_buffer.finishHour * 60 +
+                                         bufferDate.m_buffer.finishMinute    -
+                                        (bufferDate.m_buffer.startHour  * 60 +
+                                         bufferDate.m_buffer.startMinute);
+
+                        // вычитаем 8ч 45м (525м)                                     ///////////////////////////////////////////////////
+                        bufferMinutes -= 525;
+					};
+				}
+				else
+				{
+                    // считываем один символ из файла
+					masChar[1] = fin.get();
+				}
+
+			}; // закрывает while
+
+            // условие для различия времени на отработку и свободного времени
+			if (bufferMinutes > 0)
+			{
+				cout << "----------\n";
+				cout << "Free time: " << bufferMinutes/60 << "h " << bufferMinutes%60 << "m.\n";
+				cout << "----------\n";
+			}
+			else
+			{
+				cout << "-------------\n";
+				cout << "Time to work: " << (-1)*bufferMinutes/60 << "h " << (-1)*bufferMinutes%60 << "m.\n";
+				cout << "-------------\n";
+			};
+		}
+
+        // файл не прошел проверку на целостность
+		else
+        {
+			cout << "File crushed.\n";
+		}
+	};
+	fin.close();
+*/}
+
+// показать подробную информацию по датам
+void wt::TimeControl::Show()
+{
+    // объект для вывода информации из файла
+    std::ifstream fin ("Data.wt");
+
+    // проверка открылся ли файл
+	if (!fin)
+	{
+		cout << "Error! File not open.\n";
+	}
+	else
+	{
+        // переместить указатель в начало файла
+		fin.seekg (0, std::ios::beg);
+
+        // если первый символ в файле - 'v', то с файлом все в порядке
+        if (fin.get() == 'v')
+		{
+            // буферная переменная для считывания из файла
+			char buf;
+
+            // продолжать считывание пока не будет достигнут конец файла
+			while (!fin.eof())
+			{
+                // считать символ
+                buf = fin.get();
+
+                // вывод символа
+				cout << buf;
+			};
+			cout << endl;
+		}
+
+        // файл не прошел проверку на целостность
+		else
+		{
+			cout << "File crushed.\n";
+		}
+	};
+	fin.close();
 }

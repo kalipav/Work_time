@@ -57,14 +57,11 @@ int main ()
             };
             break;
 
-        // показать подробно рабочее время
-        case 's':
-        	wt::TimeControl::Show();
-            break;
-
         // установить следующий месяц
         case 'n':
             {
+                std::cout << "You try to set next month and delete all information.\n";
+
                 // переменная для ввода ключа пользователем (используется для защиты от случайного сброса)
                 std::string userKey;
 
@@ -78,9 +75,22 @@ int main ()
                 {
                     wt::TimeControl::SetNextMonth();
                 };
-
-                std::cout << "Next month set.\n";
             };
+            break;
+
+        // показать подробную информацию по датам
+        case 's':
+        	wt::TimeControl::Show();
+            break;
+
+        // показать время отработки
+        case 't':
+            wt::TimeControl::TimeToWork();
+            break;
+
+        // справка
+        case 'h':
+            //
             break;
 
         // выйти из программы

@@ -8,8 +8,6 @@
 #define MAX_HOUR           23
 #define MIN_MINUTE         0
 #define MAX_MINUTE         59
-#define FILE_NAME          "Data.wt"
-#define MAX_CONVERT_LENGTH 4
 
     // длины полей для размещения информации в файле
 #define NAME_LENGTH        16
@@ -21,7 +19,7 @@
 #define COUNT_DAYS         31
 #define DAY_LENGTH         8
 
-    // флаги файла
+    // флаги и параметры файла для проверки на целостность
 #define BEGIN_FILE_WORD "beg"
 #define END_FILE_WORD   "end"
 #define FILE_LENGTH     454
@@ -34,12 +32,18 @@
 #define POS_WORK_TIME   41
 #define POS_DINNER_TIME 48
 
-    // позиции для блокировки дней, которых нет в месяце
+    // символы для блокировки дней, которых нет в месяце
 #define SYMBOL_EMPTY ' '
 #define SYMBOL_BLOCK 'X'
+
+    // позиции для блокировки дней, которых нет в месяце
 #define POS_BLOCK_29 420
 #define POS_BLOCK_30 433
 #define POS_BLOCK_31 446
+
+    // другие константы
+#define FILE_NAME "Data.wt" // название файла
+#define ERROR_POS -1        // ошибка позиции в файле, индикатор неудачного поиска 
 
     // месяцы
 enum MONTHS {
@@ -128,6 +132,9 @@ namespace wt
         // вернуть принт дня недели даты
         static std::string GetWeekDay(const int&);
 
+		// вернуть позицию указанного дня в файле
+		static int GetPosOfDay(const int&);
+
     public:
         // конструктор
         TimeControl();
@@ -135,11 +142,11 @@ namespace wt
         // добавить/откорректировать/удалить рабочий день
         void AddCorDel(const Status&);
 
-        // показать подробно рабочее время
-        static void Show();						/////////////////////////////////////////////////////////////////////////////
+        // показать подробную информацию по датам
+        static void Show();
 
-        // вывод времени
-        static void Calculate();				 /////////////////////////////////////////////////////////////////////////////
+        // показать время отработки
+        static void TimeToWork();
 
         // проверка файла
         static bool Check();
