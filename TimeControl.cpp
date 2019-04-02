@@ -220,74 +220,6 @@ void wt::TimeControl::AddCorDel(const Status& flag)
         finout.seekg(pos, std::ios::beg);
     };
 
-    /*
-    // длина буфера для поиска даты в файле
-    const int BUF_LENGTH = 5;
-
-    // буфер
-    char dayBuf[BUF_LENGTH];
-
-    // устанавливаем указатель на начало файла
-    finout.seekg(0, std::ios::beg);
-
-    // помещаем первые 5 символов в массив
-    for (int i = 0; i < BUF_LENGTH; ++i)
-    {
-        dayBuf[i] = finout.get();
-    };
-
-    // цикл поиска даты
-    for (;;)
-    {
-        // считываем из файла символы пока не встретим "day"
-        while (dayBuf[0] != 'd' || dayBuf[1] != 'a' || dayBuf[2] != 'y')
-        {
-            // смещаем элементы на -1, кроме последнего
-            for (int i = 0; i < BUF_LENGTH - 1; ++i)
-            {
-                dayBuf[i] = dayBuf[i+1];
-            };
-
-            // последнему элементу присваиваем новый символ из файла
-            dayBuf[BUF_LENGTH - 1] = finout.get();
-
-            // если 3 последних элемента равны "end", значит произошла ошибка (поиск не нашел дату)
-            if (dayBuf[2] == 'e' && dayBuf[3] == 'n' && dayBuf[4] == 'd')
-            {
-                std::cout << "Error! Day has not found.\n";
-                finout.close();
-                return;
-            };
-        };
-
-            // проверяем 4-ый и 5-ый элементы массива (в них должна быть указана дата)
-        // длина буфера для размещения даты
-        const int DAY_NUMBER_CHAR_LENGTH = 2;
-
-        // буфер для даты
-        char dayNumberChar[DAY_NUMBER_CHAR_LENGTH];
-
-        // копируем в буфер дату (символы)
-        dayNumberChar[0] = dayBuf[3];
-        dayNumberChar[1] = dayBuf[4];
-
-        // переводим дату из char в int
-        int dayNumber = ConvertCharToInt(dayNumberChar, DAY_NUMBER_CHAR_LENGTH);
-
-        // проверяем совпадение с введеной пользователем датой
-        if (dayNumber != m_buffer.day)
-        {
-			// если дата не совпала, обнуляем первый элемент буфера, чтобы не произошло зацикливания по while
-			dayBuf[0] = SYMBOL_EMPTY;
-            continue;
-        }
-        else
-        {
-            break;
-        };
-    };
-    */
-
     // символ для проверки даты, считываем первый байт даты
     char control = finout.get();
 
@@ -468,7 +400,7 @@ void wt::TimeControl::AddCorDel(const Status& flag)
     std::cout << GetWeekDay(m_buffer.day) << " ";
 
     // вывод информации по дате
-    printf("%02d [%02d:%02d-%02d:%02d]\n",
+    printf("%02d  %02d:%02d - %02d:%02d\n",
            m_buffer.day,
            m_buffer.startHour,
            m_buffer.startMinute,
@@ -1181,25 +1113,25 @@ std::string wt::TimeControl::GetWeekDay(const int& r_DATE)
     switch (weekDayOfDate)
     {
     case 1:
-        str = "MON";
+        str = MONDAY_SHOW;
         break;
     case 2:
-        str = "TUE";
+        str = TUESDAY_SHOW;
         break;
     case 3:
-        str = "WEN";
+        str = WEDNESDAY_SHOW;
         break;
     case 4:
-        str = "THU";
+        str = THURSDAY_SHOW;
         break;
     case 5:
-        str = "FRI";
+        str = FRIDAY_SHOW;
         break;
     case 6:
-        str = "SAT";
+        str = SATURDAY_SHOW;
         break;
     case 7:
-        str = "SUN";
+        str = SUNDAY_SHOW;
         break;
     };
 
@@ -1267,7 +1199,7 @@ int wt::TimeControl::GetPosOfDay(const int& r_DATE)
 
 // показать время отработки
 void wt::TimeControl::TimeToWork()
-{/*
+{	/*
     // создаем объект для вывода информации из файла
     std::ifstream fin ("Data.wt");
 
@@ -1405,42 +1337,132 @@ void wt::TimeControl::TimeToWork()
 // показать подробную информацию по датам
 void wt::TimeControl::Show()
 {
-    // объект для вывода информации из файла
-    std::ifstream fin ("Data.wt");
+	std::cout << "Show time of all days.\n";
 
-    // проверка открылся ли файл
-	if (!fin)
-	{
-		cout << "Error! File not open.\n";
-	}
-	else
-	{
-        // переместить указатель в начало файла
-		fin.seekg (0, std::ios::beg);
+	// создаем объект для чтения информации из файла
+	std::ifstream fin("Data.wt");
 
-        // если первый символ в файле - 'v', то с файлом все в порядке
-        if (fin.get() == 'v')
+	// пройти по дням недели 1 - 31
+	for (int i = MIN_DAY; i <= MAX_DAY; ++i)
+	{
+		// позиция с информацией по времени даты
+		int pos = GetPosOfDay(i);
+
+		// устаналиваем указатель на позицию
+		fin.seekg(pos);
+
+		// символ проверки (первый символ поля времени даты)
+		char check_symbol = fin.get();
+
+		// возвращаем указатель на исходную позицию
+		fin.seekg(pos);
+
+		// проверяем дату на существование
+		if (check_symbol == SYMBOL_BLOCK)
 		{
-            // буферная переменная для считывания из файла
-			char buf;
+			// если дата заблокирована, продолжить цикл
+			continue;
+		};
 
-            // продолжать считывание пока не будет достигнут конец файла
-			while (!fin.eof())
+		// делать отступы перед понедельниками, если понедельник не первое число
+		if (i != MIN_DAY && GetWeekDay(i) == MONDAY_SHOW)
+		{
+			std::cout << std::endl;
+		};
+
+		//отобразить день недели
+		std::cout << GetWeekDay(i) << SYMBOL_EMPTY;
+
+		// вернуть позицию на -2, чтобы отобразить дату
+		pos -= 2;
+		fin.seekg(pos);
+
+		// длина буфера для даты, часов, минут, сам буфер 
+		const int BUF_LENGTH = 2;
+		char buf[BUF_LENGTH];
+
+		// заполняем буфер даты
+		for (int i = 0; i < BUF_LENGTH; ++i)
+		{
+			buf[i] = fin.get();
+		};
+
+		// выводим дату
+		for (int i = 0; i < BUF_LENGTH; ++i)
+		{
+			std::cout << buf[i];
+		};
+		std::cout << SYMBOL_EMPTY << SYMBOL_EMPTY;
+
+		// если времени нет, отобразить 6 пробелов и 1 дефис, иначе вывести время
+		if (check_symbol == SYMBOL_EMPTY)
+		{
+			for (int i = 0; i < 6; ++i)
 			{
-                // считать символ
-                buf = fin.get();
-
-                // вывод символа
-				cout << buf;
+				std::cout << SYMBOL_EMPTY;
 			};
-			cout << endl;
+			std::cout << SYMBOL_DEFIS;
 		}
-
-        // файл не прошел проверку на целостность
 		else
 		{
-			cout << "File crushed.\n";
-		}
+			// копируем в буфер часы начала рабочего дня
+			for (int i = 0; i < BUF_LENGTH; ++i)
+			{
+				buf[i] = fin.get();
+			};
+
+			// отображаем часы начала рабочего дня
+			for (int i = 0; i < BUF_LENGTH; ++i)
+			{
+				std::cout << buf[i];
+			};
+
+			// знак ':'
+			std::cout << ':';
+
+			// копируем в буфер минуты начала рабочего дня
+			for (int i = 0; i < BUF_LENGTH; ++i)
+			{
+				buf[i] = fin.get();
+			};
+
+			// отображаем минуты начала рабочего дня
+			for (int i = 0; i < BUF_LENGTH; ++i)
+			{
+				std::cout << buf[i];
+			};
+
+			// знак " - "
+			std::cout << " - ";
+
+			// копируем в буфер часы окончания рабочего дня
+			for (int i = 0; i < BUF_LENGTH; ++i)
+			{
+				buf[i] = fin.get();
+			};
+
+			// отображаем часы окончания рабочего дня
+			for (int i = 0; i < BUF_LENGTH; ++i)
+			{
+				std::cout << buf[i];
+			};
+
+			// знак ':'
+			std::cout << ':';
+
+			// копируем в буфер минуты окончания рабочего дня
+			for (int i = 0; i < BUF_LENGTH; ++i)
+			{
+				buf[i] = fin.get();
+			};
+
+			// отображаем минуты окончания рабочего дня
+			for (int i = 0; i < BUF_LENGTH; ++i)
+			{
+				std::cout << buf[i];
+			};
+		};
+		std::cout << '\n';
 	};
 	fin.close();
 }

@@ -42,8 +42,18 @@
 #define POS_BLOCK_31 446
 
     // другие константы
-#define FILE_NAME "Data.wt" // название файла
-#define ERROR_POS -1        // ошибка позиции в файле, индикатор неудачного поиска 
+#define FILE_NAME    "Data.wt" // название файла
+#define ERROR_POS    -1        // ошибка позиции в файле, индикатор неудачного поиска 
+#define SYMBOL_DEFIS '-'	   // дефис
+
+	// сокращения дней недели
+#define MONDAY_SHOW    "MON"
+#define TUESDAY_SHOW   "TUE"
+#define WEDNESDAY_SHOW "WEN"
+#define THURSDAY_SHOW  "THU"
+#define FRIDAY_SHOW    "FRI"
+#define SATURDAY_SHOW  "SAT"
+#define SUNDAY_SHOW    "SUN"
 
     // месяцы
 enum MONTHS {
