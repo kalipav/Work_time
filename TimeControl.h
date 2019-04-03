@@ -8,6 +8,7 @@
 #define MAX_HOUR           23
 #define MIN_MINUTE         0
 #define MAX_MINUTE         59
+#define MINUTES_IN_HOUR    60
 
     // длины полей для размещения информации в файле
 #define NAME_LENGTH        16
@@ -156,7 +157,7 @@ namespace wt
         static void Show();
 
         // показать время отработки
-        static void TimeToWork();
+        void TimeToWork();
 
         // проверка файла
         static bool Check();

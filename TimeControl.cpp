@@ -1199,140 +1199,162 @@ int wt::TimeControl::GetPosOfDay(const int& r_DATE)
 
 // показать время отработки
 void wt::TimeControl::TimeToWork()
-{	/*
-    // создаем объект для вывода информации из файла
-    std::ifstream fin ("Data.wt");
+{	
+	std::cout << "Count time...\n";
 
-    // проверка открылся ли файл
-	if (!fin)
-	{
-		cout << "Error! File not open.\n";
-	}
-	else
-	{
-        // перемещаем указатель в начало файла
-		fin.seekg (0, std::ios::beg);
+	// создаем объект для чтения информации из файла
+	std::ifstream fin(FILE_NAME);
 
-        // если первый символ в файле - 'v', то с файлом все в порядке
-        if (fin.get() == 'v')
+	// переменная, в которой хранится суммарное время в минутах
+	int sum_time = 0;
+
+		// считываем рабочее время в минутах и инициализируем константу
+	// устанавливаем позицию на поле с рабочим временем
+	fin.seekg(POS_WORK_TIME);
+
+	// буфер для времени работы и обеденного времени
+	const int BUF_LENGTH = WORK_TIME_LENGTH;
+	char buf[BUF_LENGTH];
+
+	// заполняем буфер (время работы)
+	for (int i = 0; i < WORK_TIME_LENGTH; ++i)
+	{
+		buf[i] = fin.get();
+	};
+
+	// преобразуем в int рабочее время из символьного буфера
+	const int WORK_TIME = ConvertCharToInt(buf, WORK_TIME_LENGTH);
+
+		// считываем обеденное время в минутах и инициализируем константу
+	// устанавливаем позицию на поле с временем обеда
+	fin.seekg(POS_DINNER_TIME);
+
+	// заполняем буфер (обеденное время)
+	for (int i = 0; i < DINNER_TIME_LENGTH; ++i)
+	{
+		buf[i] = fin.get();
+	};
+
+	// преобразуем в int обеденное время из символьного буфера
+	const int DINNER_TIME = ConvertCharToInt(buf, DINNER_TIME_LENGTH);
+
+	// пройти по дням недели 1 - 31
+	for (int i = MIN_DAY; i <= MAX_DAY; ++i)
+	{
+		// позиция с информацией по времени даты
+		int pos = GetPosOfDay(i);
+
+		// проверка позиции
+		if (pos == ERROR_POS)
 		{
-            // массив для чисел, состоящих из 2-х цифр
-            char masChar[2] = {0, 0};
+			continue;
+		};
 
-            // переменная, содержащая текущее значение
-            int bufferMinutes = 0;
+		// устаналиваем указатель на позицию
+		fin.seekg(pos);
 
-            // masChar[0] не используется, т.к. для поиска достаточно одной буферной переменной
-            masChar[1] = fin.get();
+		// символ проверки (первый символ поля времени даты)
+		char check_symbol = fin.get();
 
-            // пока не будет достигнут конец файла, выполянять ряд операций
-			while (!fin.eof())
+		// возвращаем указатель на исходную позицию
+		fin.seekg(pos);
+
+		// проверяем дату на существование и наличие времени 
+		if (check_symbol == SYMBOL_BLOCK || check_symbol == SYMBOL_EMPTY)
+		{
+			// если дата заблокирована или отсутствует время - продолжить цикл
+			continue;
+		};
+
+		// длина буфера для часов и минут
+		const int HOUR_MINUTES = 2;
+
+		// считываем час начала рабочего дня
+		for (int i = 0; i < HOUR_MINUTES; ++i)
+		{
+			buf[i] = fin.get();
+		};
+
+		// преобразуем в int час начала рабочего дня из символьного буфера
+		m_buffer.startHour = ConvertCharToInt(buf, HOUR_MINUTES);
+
+		// считываем минуты начала рабочего дня
+		for (int i = 0; i < HOUR_MINUTES; ++i)
+		{
+			buf[i] = fin.get();
+		};
+
+		// преобразуем в int минуты начала рабочего дня из символьного буфера
+		m_buffer.startMinute = ConvertCharToInt(buf, HOUR_MINUTES);
+
+		// считываем час окончания рабочего дня
+		for (int i = 0; i < HOUR_MINUTES; ++i)
+		{
+			buf[i] = fin.get();
+		};
+
+		// преобразуем в int час окончания рабочего дня из символьного буфера
+		m_buffer.finishHour = ConvertCharToInt(buf, HOUR_MINUTES);
+
+		// считываем минуты окончания рабочего дня
+		for (int i = 0; i < HOUR_MINUTES; ++i)
+		{
+			buf[i] = fin.get();
+		};
+
+		// преобразуем в int минуты окончания рабочего дня из символьного буфера
+		m_buffer.finishMinute = ConvertCharToInt(buf, HOUR_MINUTES);
+
+		// подсчитываем время пока часы и минуты не сравняются
+		while (m_buffer.startHour != m_buffer.finishHour ||
+			m_buffer.startMinute != m_buffer.finishMinute)
+		{
+			// прибавляем минуту к суммарному времени
+			++sum_time;
+
+			// сдвигаем время начала рабочего дня на 1 минуту и приближаемся к времени окончания
+			// если 59 минут - следующие минуты 00
+			if (m_buffer.startMinute == MAX_MINUTE)
 			{
-                // если найдена точка
-                if (masChar[1] == '.')
+				m_buffer.startMinute = MIN_MINUTE;
+
+				// если 23 часа - следующий час 00
+				if (m_buffer.startHour == MAX_HOUR)
 				{
-                    // считать след. символ
-                    masChar[1] = fin.get();
-
-                    // если вместо конкретного часа установлен пробел,
-                    // значит время не занесено и учитывать этот день не нужно
-                    if (masChar[1] == ' ')
-					{
-						continue;
-					}
-
-                    // если установлена дата, то ее необходимо учесть
-                    else
-					{
-                        // создаем объект
-						wt::TimeControl bufferDate;
-
-                        // переписываем первую цифру стартового часа из 1-го элемента (это не ' ')
-                        masChar[0] = masChar[1];
-
-                        // считываем вторую цифру стартового часа
-                        masChar[1] = fin.get();
-
-                        // конвертируем
-						bufferDate.m_buffer.startHour = ConvertCharToInt(masChar);
-
-                        // перемещаем указатель на 1 позицию вперед (пропускаем двоеточие и тире)
-						fin.seekg(1, std::ios::cur);
-
-                        // считываем первую цифру стартовых минут
-                        masChar[0] = fin.get();
-
-                        // считываем вторую цифру стартовых минут
-                        masChar[1] = fin.get();
-
-                        // конвертируем
-						bufferDate.m_buffer.startMinute = ConvertCharToInt(masChar);
-
-                        // перемещаем указатель на 1 позицию вперед (пропускаем двоеточие и тире)
-						fin.seekg(1, std::ios::cur);
-
-                        // считываем первую цифру финишных часов
-                        masChar[0] = fin.get();
-
-                        // считываем вторую цифру финишных часов
-                        masChar[1] = fin.get();
-
-                        // конвертируем
-						bufferDate.m_buffer.finishHour = ConvertCharToInt(masChar);
-
-                        // перемещаем указатель на 1 позицию вперед (пропускаем двоеточие и тире)
-						fin.seekg(1, std::ios::cur);
-
-                        // считываем первую цифру финишных минут
-                        masChar[0] = fin.get();
-
-                        // считываем вторую цифру финишных минут
-                        masChar[1] = fin.get();
-
-                        // конвертируем
-						bufferDate.m_buffer.finishMinute = ConvertCharToInt(masChar);
-
-						// добавляет реальное рабочее время за день
-                        bufferMinutes += bufferDate.m_buffer.finishHour * 60 +
-                                         bufferDate.m_buffer.finishMinute    -
-                                        (bufferDate.m_buffer.startHour  * 60 +
-                                         bufferDate.m_buffer.startMinute);
-
-                        // вычитаем 8ч 45м (525м)                                     ///////////////////////////////////////////////////
-                        bufferMinutes -= 525;
-					};
+					m_buffer.startHour = MIN_HOUR;
 				}
 				else
 				{
-                    // считываем один символ из файла
-					masChar[1] = fin.get();
-				}
-
-			}; // закрывает while
-
-            // условие для различия времени на отработку и свободного времени
-			if (bufferMinutes > 0)
-			{
-				cout << "----------\n";
-				cout << "Free time: " << bufferMinutes/60 << "h " << bufferMinutes%60 << "m.\n";
-				cout << "----------\n";
+					++m_buffer.startHour;
+				};
 			}
 			else
 			{
-				cout << "-------------\n";
-				cout << "Time to work: " << (-1)*bufferMinutes/60 << "h " << (-1)*bufferMinutes%60 << "m.\n";
-				cout << "-------------\n";
+				++m_buffer.startMinute;
 			};
-		}
+		};
 
-        // файл не прошел проверку на целостность
-		else
-        {
-			cout << "File crushed.\n";
-		}
+		// вычитаем рабочее и обеденное время
+		sum_time -= WORK_TIME;
+		sum_time -= DINNER_TIME;
 	};
+
+	// если суммарное время меньше нуля - необходима доработка
+	if (sum_time < NULL)
+	{
+		std::cout << "You should work " << (-1) * sum_time / MINUTES_IN_HOUR <<
+			"h " << (-1) * sum_time % MINUTES_IN_HOUR << "m else.\n";
+	}
+
+	// иначе проинформировать о наличии свободного времени
+	else
+	{
+		std::cout << "You have free " << sum_time / MINUTES_IN_HOUR <<
+			"h " << sum_time % MINUTES_IN_HOUR << "m.\n";
+	};
+
 	fin.close();
-*/}
+}
 
 // показать подробную информацию по датам
 void wt::TimeControl::Show()
@@ -1340,13 +1362,19 @@ void wt::TimeControl::Show()
 	std::cout << "Show time of all days.\n";
 
 	// создаем объект для чтения информации из файла
-	std::ifstream fin("Data.wt");
+	std::ifstream fin(FILE_NAME);
 
 	// пройти по дням недели 1 - 31
 	for (int i = MIN_DAY; i <= MAX_DAY; ++i)
 	{
 		// позиция с информацией по времени даты
 		int pos = GetPosOfDay(i);
+
+		// проверка позиции
+		if (pos == ERROR_POS)
+		{
+			continue;
+		};
 
 		// устаналиваем указатель на позицию
 		fin.seekg(pos);

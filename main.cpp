@@ -85,8 +85,11 @@ int main ()
 
         // показать время отработки
         case 't':
-            wt::TimeControl::TimeToWork();
-            break;
+			{
+				wt::TimeControl dayParams;
+				dayParams.TimeToWork(); 
+			};
+			break;
 
         // справка
         case 'h':
