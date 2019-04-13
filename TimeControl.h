@@ -1,7 +1,7 @@
 ﻿#ifndef _TIMECONTROL_H_
 #define _TIMECONTROL_H_
 
-    // константы, контролирующие корректность ввода пользователя
+    // константы, связанные с обработкой времени
 #define MIN_DAY            1
 #define MAX_DAY            31
 #define MIN_HOUR           0
@@ -37,7 +37,7 @@
 #define SYMBOL_EMPTY ' '
 #define SYMBOL_BLOCK 'X'
 
-    // позиции для блокировки дней, которых нет в месяце
+    // позиции для блокировки дней (29, 30 и 31 числа), которых нет в месяце
 #define POS_BLOCK_29 420
 #define POS_BLOCK_30 433
 #define POS_BLOCK_31 446
@@ -46,6 +46,7 @@
 #define FILE_NAME    "Data.wt" // название файла
 #define ERROR_POS    -1        // ошибка позиции в файле, индикатор неудачного поиска 
 #define SYMBOL_DEFIS '-'	   // дефис
+#define SYMBOL_DOT   '.'	   // точка
 
 	// сокращения дней недели
 #define MONDAY_SHOW    "MON"
@@ -167,6 +168,9 @@ namespace wt
 
         // установить следующий месяц
         static void SetNextMonth();
+
+        // помощь
+        static void Help();
     };
 };
 

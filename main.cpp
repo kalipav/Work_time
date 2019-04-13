@@ -1,17 +1,18 @@
 ﻿// класс, управляющий подсчетом времени
 #include "TimeControl.h"
 
-// ключ для установки следующего месяца
+// пароль для установки следующего месяца
 #define PASSWORD "next"
 
-int main ()
+int main()
 {
     std::cout << "\tWORK TIME CONTROL\n";
 	
-    // проверить целостность файла, поля
+    // проверить целостность файла, полей
     if (!wt::TimeControl::Check())
     {
         std::cout << "Errors found. Exit...\n";
+        _getch();
         return 0;
     };
     
@@ -60,13 +61,13 @@ int main ()
         // установить следующий месяц
         case 'n':
             {
-                std::cout << "You try to set next month and delete all information.\n";
+                std::cout << "\nYou try to set next month and delete all information.\n";
 
                 // переменная для ввода ключа пользователем (используется для защиты от случайного сброса)
                 std::string userKey;
 
                 // ввод ключа
-                cout << "Enter \""<< PASSWORD << "\" for activate:\n";
+                cout << "Enter \""<< PASSWORD << "\" and press \"ENTER\" for activate:\n";
                 cout << "> ";
                 cin >> userKey;
 
@@ -74,6 +75,10 @@ int main ()
                 if (PASSWORD == userKey)
                 {
                     wt::TimeControl::SetNextMonth();
+                }
+                else
+                {
+                    std::cout << "Incorrect word. Operation has canceled.\n";
                 };
             };
             break;
@@ -93,7 +98,7 @@ int main ()
 
         // справка
         case 'h':
-            //
+            wt::TimeControl::Help();
             break;
 
         // выйти из программы
@@ -104,11 +109,12 @@ int main ()
         	cout << "Unknown command.\n";
         };
 
-        // проверить целостность файла, поля
+        // проверить целостность файла, полей
         if (!wt::TimeControl::Check())
         {
             std::cout << "Errors found. Exit...\n";
-            break;
+            _getch();
+            return 0;
         };
     };
 }

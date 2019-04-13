@@ -13,156 +13,6 @@ wt::TimeControl::TimeControl()
     //cout << "Constructor.\n";
 }
 
-// преобразование char в int
-// [in]  const char* - массив
-// [in]  const int&  - длина массива, по умолчанию = 1
-// [out] int         - преобразованное значение
-int wt::TimeControl::ConvertCharToInt(const char* p_MAS_CHAR, const int& r_LENGTH)
-{
-    // максимальная длина преобразуемого массива
-	const int MAX_CONVERT_LENGTH = 4;
-    
-    // копия массива
-    char p_char_copy[MAX_CONVERT_LENGTH];
-
-    // копируем массив
-    for (int i = 0; i < r_LENGTH; ++i)
-    {
-        p_char_copy[i] = p_MAS_CHAR[i];
-    };
-
-    // проверка на длину массива
-    if (r_LENGTH > MAX_CONVERT_LENGTH || r_LENGTH <= 0)
-    {
-        std::cout << "Error! Convertation failed. Wrong length.\n";
-        abort();
-    };
-
-    // проверка на наличие исключительно цифр в массиве
-    for (int i = 0; i < r_LENGTH; ++i)
-    {
-        // символ '0' - это 48 в десятич. системе, '1' = 49, ..., '9' = 57
-        if ((int)(p_char_copy[i]) < 48 || (int)(p_char_copy[i]) > 57)
-        {
-            std::cout << "Error! Try to convert letter.\n";
-            abort();
-        };
-    };
-
-    // начальное значение числа
-    int number = 0;
-
-    // буфер для символа при перевороте
-    char buf;
-
-    // переворачиваем массив для корректности разрядов
-    if (r_LENGTH == 2)
-    {
-        // меняем местами элементы массива
-        buf = p_char_copy[0];
-        p_char_copy[0] = p_char_copy[1];
-        p_char_copy[1] = buf;
-    }
-    else if (r_LENGTH == 3)
-    {
-        // меняем местами 0-ой и 2-ой элементы
-        buf = p_char_copy[0];
-        p_char_copy[0] = p_char_copy[2];
-        p_char_copy[2] = buf;
-    }
-    else if (r_LENGTH == 4)
-    {
-        // меняем местами 0-ой и 3-ий, 1-ый и 2-ой элементы
-        buf = p_char_copy[0];
-        p_char_copy[0] = p_char_copy[3];
-        p_char_copy[3] = buf;
-        buf = p_char_copy[1];
-        p_char_copy[1] = p_char_copy[2];
-        p_char_copy[2] = buf;
-    };
-
-    // переводим число
-	for (int i = 0; i < 10; ++i)
-	{
-        // символ '0' - это 48 в десятич. системе, '1' = 49, ..., '9' = 57
-		if (r_LENGTH >= 1)
-		{
-			if (p_char_copy[0] == 48 + i)
-			{
-				number += i;
-			}
-		};
-
-		if (r_LENGTH >= 2)
-		{
-			if (p_char_copy[1] == 48 + i)
-			{
-				number += i * 10;
-			}
-		};
-
-		if (r_LENGTH >= 3)
-		{
-			if (p_char_copy[2] == 48 + i)
-			{
-				number += i * 100;
-			}
-		};
-
-		if (r_LENGTH == MAX_CONVERT_LENGTH)
-		{
-			if (p_char_copy[3] == 48 + i)
-			{
-				number += i * 1000;
-			}
-		};
-	};
-
-	return number;
-}
-
-// преобразование int в char
-// [in]     const int& - возвращаемое число в int
-// [in/out] char*      - массив char для цифр
-// [in]     const int& - длина входного массива, по умолчанию - 1 элемент
-void wt::TimeControl::ConvertIntToChar (const int& r_NUMBER, char* p_massChar, const int& r_LENGTH)
-{
-    // разбор по разрядам числа
-    int thousands = r_NUMBER / 1000;
-    int hundreds  = (r_NUMBER - thousands * 1000) / 100;
-    int decades   = (r_NUMBER - thousands * 1000 - hundreds * 100) / 10;
-    int ones      = r_NUMBER % 10;
-
-    // подбор цифр
-    for (int i = 0; i < 10; ++i)
-    {
-        // символ '0' - это 48 в десятич. системе, '1' = 49, ..., '9' = 57
-        // если длина массива - ... символа
-        if (r_LENGTH == 4)
-        {
-            if (thousands == i) p_massChar[0] = i+48;
-            if (hundreds  == i) p_massChar[1] = i+48;
-            if (decades   == i) p_massChar[2] = i+48;
-            if (ones      == i) p_massChar[3] = i+48;
-        }
-        else if (r_LENGTH == 3)
-        {
-            if (hundreds == i) p_massChar[0] = i+48;
-            if (decades  == i) p_massChar[1] = i+48;
-            if (ones     == i) p_massChar[2] = i+48;
-        }
-        else if (r_LENGTH == 2)
-        {
-            if (decades == i) p_massChar[0] = i+48;
-            if (ones    == i) p_massChar[1] = i+48;
-        }
-        else if (r_LENGTH == 1)
-        {
-            if (ones == i)    p_massChar[0] = i+48;
-        };
-    };
-}
-
 // добавить/откорректировать/удалить рабочий день
 // [in] const wt::Add_status& - флаг добавления/корректировки/удаления
 void wt::TimeControl::AddCorDel(const Status& flag)
@@ -395,7 +245,7 @@ void wt::TimeControl::AddCorDel(const Status& flag)
         std::cout << "Day " << m_buffer.day << " cleared.\n";
 		return;
     };
-
+	/*
     // вывод дня недели даты
     std::cout << GetWeekDay(m_buffer.day) << " ";
 
@@ -405,7 +255,7 @@ void wt::TimeControl::AddCorDel(const Status& flag)
            m_buffer.startHour,
            m_buffer.startMinute,
            m_buffer.finishHour,
-           m_buffer.finishMinute);
+           m_buffer.finishMinute);*/
 }
 
 // проверить целостность файла, поля
@@ -418,13 +268,13 @@ bool wt::TimeControl::Check()
     // проверка открылся ли файл
     if (!finout)
     {
-        std::cout << "File is not open!\n";
+        std::cout << "\nData file hasn't opened!\n";
 
         // буферная переменная
         char buf;
 
         // предложить пользователю создать новый файл
-        std::cout << "Do you want to create a new file? (y - \"yes\"): ";
+        std::cout << "Do you want to create a new data file? (y - \"yes\"): ";
 
         // ввод
         buf = _getch();
@@ -436,23 +286,19 @@ bool wt::TimeControl::Check()
             // создать файл по шаблону
             if (!CreateTemplate())
             {
-                std::cout << "Check ended with error!\n";
+                std::cout << "\nCheck ended with error!\n";
                 return false;
             };
 
-            // повторное открытие файла
-            finout.open(FILE_NAME, std::ios::in | std::ios::out);
+            // закрываем файл
+            finout.close();
 
-            // проверка открылся ли файл во второй раз
-            if (!finout)
-            {
-                std::cout << "File is not open!\n";
-                return false;
-            };
+            // успешное завершение метода
+            return true;
         }
         else
         {
-            std::cout << "Check ended with error!\n";
+            std::cout << "\nCheck ended with error!\n";
             return false;
         }
     };
@@ -460,7 +306,7 @@ bool wt::TimeControl::Check()
     // проверка на целостность файла
     if (!IsCrushed(finout))
     {
-        std::cout << "Check ended with error!\n";
+        std::cout << "\nCheck ended with error!\n";
         return false;
     };
 
@@ -636,7 +482,7 @@ void wt::TimeControl::FillTemplate()
     // запрашиваем имя у пользователя пока не будет введено подтверждение имени или пока имя длиннее поля под имя
     do
     {
-        std::cout << "Enter your name (" << NAME_LENGTH << " symbols max): ";
+        std::cout << "\nEnter your name (" << NAME_LENGTH << " symbols max) and press \"ENTER\": ";
         std::cin >> buf;
 
         std::cout << "If correct - enter 'y': ";
@@ -654,7 +500,7 @@ void wt::TimeControl::FillTemplate()
     // вводим год
     do
     {
-        std::cout << "Enter year: ";
+        std::cout << "\nEnter year and press \"ENTER\": ";
         std::cin >> buf;
 
         std::cout << "If correct - enter 'y': ";
@@ -672,7 +518,7 @@ void wt::TimeControl::FillTemplate()
     // вводим месяц
     do
     {
-        std::cout << "Enter month: ";
+        std::cout << "\nEnter month and press \"ENTER\": ";
         std::cin >> buf;
 
         std::cout << "If correct - enter 'y': ";
@@ -696,7 +542,7 @@ void wt::TimeControl::FillTemplate()
     // вводим день недели первого числа месяца
     do
     {
-        std::cout << "Enter weekday of 1st day of month\n";
+        std::cout << "\nEnter weekday of 1st day of month and press \"ENTER\"\n";
         std::cout << "(1 - MON, 2 - TUE, 3 - WEN, 4 - THU, 5 - FRI, 6 - SAT, 7 - SUN): ";
         std::cin >> buf;
 
@@ -715,7 +561,7 @@ void wt::TimeControl::FillTemplate()
     // вводим количество рабочих часов в минутах
     do
     {
-        std::cout << "Enter work time in minutes: ";
+        std::cout << "\nEnter work time in minutes and press \"ENTER\": ";
         std::cin >> buf;
 
         std::cout << "If correct - enter 'y': ";
@@ -742,7 +588,7 @@ void wt::TimeControl::FillTemplate()
     // вводим обеденное время в минутах
     do
     {
-        std::cout << "Enter dinner time in minutes: ";
+        std::cout << "\nEnter dinner time in minutes and press \"ENTER\": ";
         std::cin >> buf;
 
         std::cout << "If correct - enter 'y': ";
@@ -899,7 +745,7 @@ void wt::TimeControl::SetDays()
 void wt::TimeControl::SetNextMonth()
 {
     // индикация начала метода
-    std::cout << "Start to set next month.\n";
+    std::cout << "\nStart to set next month.\n";
 
     // объект для чтения/записи
     std::fstream finout (FILE_NAME, std::ios::in | std::ios::out);
@@ -1359,7 +1205,7 @@ void wt::TimeControl::TimeToWork()
 // показать подробную информацию по датам
 void wt::TimeControl::Show()
 {
-	std::cout << "Show time of all days.\n";
+	std::cout << "Show time of all days.\n\n";
 
 	// создаем объект для чтения информации из файла
 	std::ifstream fin(FILE_NAME);
@@ -1401,11 +1247,11 @@ void wt::TimeControl::Show()
 		//отобразить день недели
 		std::cout << GetWeekDay(i) << SYMBOL_EMPTY;
 
-		// вернуть позицию на -2, чтобы отобразить дату
-		pos -= 2;
-		fin.seekg(pos);
+		// позиция для отображения даты (-2 символа)
+		int posDate = pos - 2;
+		fin.seekg(posDate);
 
-		// длина буфера для даты, часов, минут, сам буфер 
+		// длина буфера для даты, месяца, часов, минут, сам буфер 
 		const int BUF_LENGTH = 2;
 		char buf[BUF_LENGTH];
 
@@ -1420,7 +1266,52 @@ void wt::TimeControl::Show()
 		{
 			std::cout << buf[i];
 		};
+
+		// точка между днем и месяцем
+		std::cout << SYMBOL_DOT;
+
+		// устаналиваем указатель на позицию c месяцем
+		fin.seekg(POS_MONTH);
+
+		// заполняем буфер данными месяца
+		for (int i = 0; i < MONTH_LENGTH; ++i)
+		{
+			buf[i] = fin.get();
+		};
+
+		// выводим месяц
+		for (int i = 0; i < MONTH_LENGTH; ++i)
+		{
+			std::cout << buf[i];
+		};
+
+		// точка между месяцем и годом
+		std::cout << SYMBOL_DOT;
+
+		// устаналиваем указатель на позицию c годом
+		fin.seekg(POS_YEAR);
+
+		// длина буфера для года и сам буфер
+		const int BUF_YEAR_LENGTH = 4;
+		char buf_year[BUF_YEAR_LENGTH];
+
+		// заполняем буфер данными года
+		for (int i = 0; i < BUF_YEAR_LENGTH; ++i)
+		{
+			buf_year[i] = fin.get();
+		};
+
+		// выводим год
+		for (int i = 0; i < BUF_YEAR_LENGTH; ++i)
+		{
+			std::cout << buf_year[i];
+		};
+
+		// два пробела между годом и часами начала рабочего дня
 		std::cout << SYMBOL_EMPTY << SYMBOL_EMPTY;
+
+		// устанавливаем указатель на часы начала рабочего дня
+		fin.seekg(pos);
 
 		// если времени нет, отобразить 6 пробелов и 1 дефис, иначе вывести время
 		if (check_symbol == SYMBOL_EMPTY)
@@ -1493,4 +1384,167 @@ void wt::TimeControl::Show()
 		std::cout << '\n';
 	};
 	fin.close();
+}
+
+// помощь
+void wt::TimeControl::Help()
+{
+    std::cout << "\n    Commands:\n"
+        << "a - add new day, format - XX (01, 05, 14, 31, 59)\n"
+        << "c - correct existing day, format - XX (01, 05, 14, 31, 59)\n"
+        << "d - delete existing day\n"
+        << "n - set next month and delete all information\n"
+        << "s - show time of all days\n"
+        << "t - show time to work/free time\n"
+        << "q - quit\n";
+}
+
+// преобразование char в int
+// [in]  const char* - массив
+// [in]  const int&  - длина массива, по умолчанию = 1
+// [out] int         - преобразованное значение
+int wt::TimeControl::ConvertCharToInt(const char* p_MAS_CHAR, const int& r_LENGTH)
+{
+    // максимальная длина преобразуемого массива
+	const int MAX_CONVERT_LENGTH = 4;
+    
+    // копия массива
+    char p_char_copy[MAX_CONVERT_LENGTH];
+
+    // копируем массив
+    for (int i = 0; i < r_LENGTH; ++i)
+    {
+        p_char_copy[i] = p_MAS_CHAR[i];
+    };
+
+    // проверка на длину массива
+    if (r_LENGTH > MAX_CONVERT_LENGTH || r_LENGTH <= 0)
+    {
+        std::cout << "Error! Convertation failed. Wrong length.\n";
+        abort();
+    };
+
+    // проверка на наличие исключительно цифр в массиве
+    for (int i = 0; i < r_LENGTH; ++i)
+    {
+        // символ '0' - это 48 в десятич. системе, '1' = 49, ..., '9' = 57
+        if ((int)(p_char_copy[i]) < 48 || (int)(p_char_copy[i]) > 57)
+        {
+            std::cout << "Error! Try to convert letter.\n";
+            abort();
+        };
+    };
+
+    // начальное значение числа
+    int number = 0;
+
+    // буфер для символа при перевороте
+    char buf;
+
+    // переворачиваем массив для корректности разрядов в зависимости от длины буфера
+    if (r_LENGTH == 2)
+    {
+        // меняем местами элементы массива
+        buf = p_char_copy[0];
+        p_char_copy[0] = p_char_copy[1];
+        p_char_copy[1] = buf;
+    }
+    else if (r_LENGTH == 3)
+    {
+        // меняем местами 0-ой и 2-ой элементы
+        buf = p_char_copy[0];
+        p_char_copy[0] = p_char_copy[2];
+        p_char_copy[2] = buf;
+    }
+    else if (r_LENGTH == 4)
+    {
+        // меняем местами 0-ой и 3-ий, 1-ый и 2-ой элементы
+        buf = p_char_copy[0];
+        p_char_copy[0] = p_char_copy[3];
+        p_char_copy[3] = buf;
+        buf = p_char_copy[1];
+        p_char_copy[1] = p_char_copy[2];
+        p_char_copy[2] = buf;
+    };
+
+    // переводим число (проходим по всем числам от 0 до 9)
+	for (int i = 0; i < 10; ++i)
+	{
+        // символ '0' - это 48 в десятич. системе, '1' = 49, ..., '9' = 57
+		if (r_LENGTH >= 1)
+		{
+			if (p_char_copy[0] == 48 + i)
+			{
+				number += i;
+			}
+		};
+
+		if (r_LENGTH >= 2)
+		{
+			if (p_char_copy[1] == 48 + i)
+			{
+				number += i * 10;
+			}
+		};
+
+		if (r_LENGTH >= 3)
+		{
+			if (p_char_copy[2] == 48 + i)
+			{
+				number += i * 100;
+			}
+		};
+
+		if (r_LENGTH == MAX_CONVERT_LENGTH)
+		{
+			if (p_char_copy[3] == 48 + i)
+			{
+				number += i * 1000;
+			}
+		};
+	};
+
+	return number;
+}
+
+// преобразование int в char
+// [in]     const int& - возвращаемое число в int
+// [in/out] char*      - массив char для цифр
+// [in]     const int& - длина входного массива, по умолчанию - 1 элемент
+void wt::TimeControl::ConvertIntToChar (const int& r_NUMBER, char* p_massChar, const int& r_LENGTH)
+{
+    // разбор по разрядам числа
+    int thousands = r_NUMBER / 1000;
+    int hundreds  = (r_NUMBER - thousands * 1000) / 100;
+    int decades   = (r_NUMBER - thousands * 1000 - hundreds * 100) / 10;
+    int ones      = r_NUMBER % 10;
+
+    // подбор цифр
+    for (int i = 0; i < 10; ++i)
+    {
+        // символ '0' - это 48 в десятич. системе, '1' = 49, ..., '9' = 57
+        // если длина массива - ... символа
+        if (r_LENGTH == 4)
+        {
+            if (thousands == i) p_massChar[0] = i+48;
+            if (hundreds  == i) p_massChar[1] = i+48;
+            if (decades   == i) p_massChar[2] = i+48;
+            if (ones      == i) p_massChar[3] = i+48;
+        }
+        else if (r_LENGTH == 3)
+        {
+            if (hundreds == i) p_massChar[0] = i+48;
+            if (decades  == i) p_massChar[1] = i+48;
+            if (ones     == i) p_massChar[2] = i+48;
+        }
+        else if (r_LENGTH == 2)
+        {
+            if (decades == i) p_massChar[0] = i+48;
+            if (ones    == i) p_massChar[1] = i+48;
+        }
+        else if (r_LENGTH == 1)
+        {
+            if (ones == i)    p_massChar[0] = i+48;
+        };
+    };
 }
